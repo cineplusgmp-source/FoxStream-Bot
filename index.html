@@ -1,58 +1,179 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fox Stream Bot</title>
+
+  <!-- Bootstrap 5 (responsive, sin instalar nada) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
-    h2 { text-align: center; color: #333; }
-    form { max-width: 400px; margin: auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
-    label { display: block; margin-top: 10px; }
-    input, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
-    fieldset { margin-top: 15px; }
-    #resultado { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f0f0f0; white-space: pre-wrap; }
+    body{background:#f5f6fa}
+    .app{max-width:720px;margin:24px auto;padding:12px}
+    .chat{background:#fff;border-radius:16px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.06)}
+    .msg{display:flex;margin-bottom:12px}
+    .msg .bubble{max-width:85%;padding:10px 12px;border-radius:14px;font-size:15px;line-height:1.35}
+    .from-bot .bubble{background:#e9f5ff;border:1px solid #d5ecff}
+    .from-user{justify-content:flex-end}
+    .from-user .bubble{background:#e7ffe9;border:1px solid #c9f4cd}
+    .composer{display:flex;gap:8px}
+    .composer input{flex:1}
+    .options button{margin:4px 6px 0 0}
+    .brand{font-weight:700}
+    @media (max-width:480px){
+      .msg .bubble{max-width:92%}
+    }
   </style>
 </head>
 <body>
+  <div class="app">
+    <div class="text-center mb-3">
+      <h2 class="brand">Fox Stream Bot</h2>
+      <div class="text-muted small">Soporte automático 24/7</div>
+    </div>
 
-  <h2>Fox Stream Bot</h2>
+    <div class="chat" id="chat">
+      <!-- Mensajes se insertan aquí -->
+    </div>
 
-  <form id="foxForm">
-    <label for="celular">Celular</label>
-    <input type="tel" id="celular" name="celular" placeholder="+51 987654321" required>
-
-    <label for="correo">Correo</label>
-    <input type="email" id="correo" name="correo" placeholder="correo@ejemplo.com" required>
-
-    <fieldset>
-      <legend>Selecciona una opción</legend>
-      <label><input type="radio" name="opcion" value="1" checked> Código de acceso temporal</label>
-      <label><input type="radio" name="opcion" value="2"> Actualizar tu Hogar</label>
-      <label><input type="radio" name="opcion" value="3"> Nueva solicitud de inicio (TV)</label>
-    </fieldset>
-
-    <button type="submit">Enviar</button>
-  </form>
-
-  <div id="resultado"></div>
+    <form class="composer mt-2" id="composer">
+      <input id="input" class="form-control" placeholder="Escribe aquí… (ej: hola)" autocomplete="off">
+      <button class="btn btn-primary" type="submit">Enviar</button>
+    </form>
+  </div>
 
   <script>
-    const form = document.getElementById('foxForm');
-    const resultado = document.getElementById('resultado');
+    // === Config ===
+    // Paso 7 cambiaremos API_URL a tu endpoint en Vercel: "https://TU-PROYECTO.vercel.app/api/validate"
+    const API_URL = ""; // si está vacío, usará la lista local
 
-    form.addEventListener('submit', function(e) {
+    // Lista local para pruebas rápidas (edítala con tus clientes)
+    const ALLOWED_NUMBERS = [
+      "51995602221", "50232338393", "519803220026", "51910303715"
+    ];
+
+    // === Utilidades ===
+    const chat = document.getElementById('chat');
+    const composer = document.getElementById('composer');
+    const input = document.getElementById('input');
+    let state = "idle"; // idle → ask_phone → validated
+    let validated = false;
+
+    const normalize = s => (s||"").toString().replace(/\D/g,'');
+    function addMsg(text, who="bot"){
+      const wrap = document.createElement('div');
+      wrap.className = `msg ${who==="bot"?"from-bot":"from-user"}`;
+      wrap.innerHTML = `<div class="bubble">${text}</div>`;
+      chat.appendChild(wrap);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    async function validatePhoneLocalOrAPI(phoneRaw){
+      const phone = normalize(phoneRaw);
+      if(!phone) return {ok:false, message:"Indica un número válido."};
+
+      // Si hay API_URL, consultar servidor
+      if(API_URL){
+        try{
+          const res = await fetch(`${API_URL}?phone=${encodeURIComponent(phone)}`, {method:'GET'});
+          const data = await res.json();
+          return data;
+        }catch(e){
+          return {ok:false, message:"Error validando número. Intenta de nuevo."};
+        }
+      }
+
+      // Modo local (pruebas)
+      const ok = ALLOWED_NUMBERS.some(aut => {
+        const a = normalize(aut);
+        return a && (a===phone || a.endsWith(phone) || phone.endsWith(a));
+      });
+      return ok
+        ? {ok:true, message:"Número verificado. ¡Bienvenido!"}
+        : {ok:false, message:"Tu número no está registrado. Contacta al administrador."};
+    }
+
+    function showOptions(){
+      const box = document.createElement('div');
+      box.className = 'options';
+      box.innerHTML = `
+        <div class="msg from-bot"><div class="bubble">
+          Selecciona una opción:
+          <div class="mt-2">
+            <button class="btn btn-outline-primary btn-sm" data-opt="1">1) Código de acceso temporal</button>
+            <button class="btn btn-outline-primary btn-sm" data-opt="2">2) Actualizar tu Hogar</button>
+            <button class="btn btn-outline-primary btn-sm" data-opt="3">3) Nueva solicitud de inicio (TV)</button>
+          </div>
+        </div></div>
+      `;
+      box.querySelectorAll('button').forEach(btn=>{
+        btn.addEventListener('click', e=>{
+          e.preventDefault();
+          const opt = btn.getAttribute('data-opt');
+          handleOption(opt);
+        });
+      });
+      chat.appendChild(box.firstElementChild);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function handleOption(opt){
+      if(!validated){ addMsg("Primero valida tu número escribiendo: hola", "bot"); return; }
+      addMsg(opt, "user");
+      if(opt==="1"){
+        addMsg("📌 Código de acceso temporal: <b>934231163</b>", "bot");
+      }else if(opt==="2"){
+        addMsg("🏠 Para actualizar tu hogar: visita el menú en tu TV y elige 'Actualizar Hogar'.", "bot");
+      }else if(opt==="3"){
+        addMsg("📺 Nueva solicitud de inicio: en la TV elige 'Enviar enlace de inicio de sesión'.", "bot");
+      }else{
+        addMsg("Opción no válida.", "bot");
+      }
+    }
+
+    // === Inicio del flujo ===
+    addMsg("👋 ¡Hola! Escribe <b>hola</b> para comenzar.", "bot");
+
+    composer.addEventListener('submit', async (e)=>{
       e.preventDefault();
+      const text = input.value.trim();
+      if(!text) return;
+      addMsg(text, "user");
+      input.value = "";
 
-      const celular = document.getElementById('celular').value;
-      const correo = document.getElementById('correo').value;
-      const opcion = document.querySelector('input[name="opcion"]:checked').value;
+      if(state==="idle"){
+        if(text.toLowerCase()==="hola"){
+          state = "ask_phone";
+          addMsg("Escribe tu número de teléfono para validar acceso.", "bot");
+        }else{
+          addMsg("Para iniciar escribe: <b>hola</b>", "bot");
+        }
+        return;
+      }
 
-      resultado.innerText = "📱 Celular: " + celular +
-                            "\n📧 Correo: " + correo +
-                            "\n🔑 Opción seleccionada: " + opcion +
-                            "\n\n✅ (Aquí mostraremos la respuesta automática cuando conectemos el bot).";
+      if(state==="ask_phone"){
+        const res = await validatePhoneLocalOrAPI(text);
+        if(res.ok){
+          validated = true;
+          state = "validated";
+          addMsg("✅ " + (res.message || "Número verificado. ¡Bienvenido!"), "bot");
+          showOptions();
+        }else{
+          validated = false;
+          addMsg("🚫 " + (res.message || "Número no autorizado."), "bot");
+          addMsg("Si necesitas ayuda, contacta al administrador.", "bot");
+          state = "idle";
+        }
+        return;
+      }
+
+      if(state==="validated"){
+        // Cuando ya está validado, permitir atajos por texto: 1,2,3
+        if(["1","2","3"].includes(text)) return handleOption(text);
+        addMsg("Escribe 1, 2 o 3, o pulsa un botón.", "bot");
+      }
     });
   </script>
-
 </body>
 </html>
