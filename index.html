@@ -1,285 +1,244 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Fox Stream Bot</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#f5f7fb;
-    --card:#ffffff;
-    --primary:#1a73e8;
-    --bot:#e9f1ff;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --success:#0f9d58;
-    --danger:#d93025;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    background:var(--bg);
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-    color:var(--text);
-  }
-  .wrap{
-    max-width:920px;
-    margin:24px auto;
-    padding:16px;
-  }
-  .card{
-    background:var(--card);
-    border-radius:18px;
-    box-shadow:0 6px 22px rgba(0,0,0,.06);
-    padding:20px;
-  }
-  h1{
-    text-align:center;
-    margin:0 0 4px;
-  }
-  .subtitle{
-    text-align:center;
-    color:var(--muted);
-    margin:0 0 16px;
-    font-size:14px;
-  }
-
-  /* Chat area */
-  .chat{
-    border:1px solid #e5e7eb;
-    border-radius:14px;
-    padding:12px;
-    min-height:260px;           /* suficiente para que no se vea “vacío” */
-    max-height:60vh;            /* crece y luego hace scroll */
-    overflow:auto;
-  }
-  .msg{
-    display:inline-flex;
-    align-items:flex-start;
-    gap:.5rem;
-    background:var(--bot);
-    padding:10px 12px;
-    border-radius:10px;
-    margin:10px 0;
-    width:fit-content;
-    max-width:min(680px, 95%);
-  }
-  .msg.user{
-    background:#eef2f7;
-    margin-left:auto;
-  }
-  .msg p{margin:0}
-  .msg small{color:var(--muted)}
-
-  .inputbar{
-    display:flex; gap:10px; margin-top:12px;
-  }
-  .inputbar input{
-    flex:1;
-    padding:12px 14px;
-    border:1px solid #e5e7eb;
-    border-radius:10px;
-    font-size:15px;
-  }
-  .inputbar button{
-    background:var(--primary);
-    color:#fff;
-    border:0;
-    padding:0 18px;
-    border-radius:10px;
-    font-weight:600;
-    cursor:pointer;
-  }
-  .pill{
-    display:inline-block;
-    padding:8px 10px;
-    border:1px solid #cfe1ff;
-    background:#f4f9ff;
-    border-radius:8px;
-    margin:6px 6px 0 0;
-    cursor:pointer;
-  }
-  .ok{color:var(--success);font-weight:600}
-  .err{color:var(--danger);font-weight:600}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fox Stream Bot</title>
+  <style>
+    :root{
+      --bg:#f4f6f8;
+      --card:#ffffff;
+      --primary:#2563eb;
+      --primary-weak:#e8f0ff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --ok:#16a34a;
+      --bubble:#e9f1ff;
+      --radius:16px;
+    }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;}
+    .wrap{max-width:960px;margin:28px auto;padding:0 16px;}
+    .card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 6px 24px rgba(15,23,42,.06)}
+    .title{font-size:clamp(22px,3.3vw,38px);font-weight:800;letter-spacing:.3px;text-align:center;margin:4px 0 2px}
+    .subtitle{font-size:14px;color:var(--muted);text-align:center;margin-bottom:18px}
+    .chat{border:1px solid #e7e9ee;border-radius:20px;min-height:48vh;max-height:74vh;overflow:auto;background:#fff;padding:16px}
+    .row{display:flex;gap:10px;margin:10px 0}
+    .bot{background:var(--bubble);border-radius:14px;padding:10px 12px;max-width:90%;box-shadow:inset 0 0 0 1px rgba(37,99,235,.06)}
+    .user{background:#eef2ff;border-radius:14px;padding:8px 10px;font-size:14px;color:#334155}
+    .ok{color:#0a7e34;font-weight:700}
+    .btns{background:#edf2ff;border:1px solid #dbe7ff;border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:10px}
+    .chip{border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;background:#fff;cursor:pointer}
+    .chip:hover{background:#f1f5ff;border-color:#94a3b8}
+    .bar{display:flex;gap:10px;margin-top:14px}
+    .in{flex:1;border:1px solid #dfe3ea;border-radius:12px;padding:12px 14px;font-size:15px}
+    .send{background:var(--primary);color:#fff;border:0;border-radius:12px;padding:0 16px;font-weight:600;cursor:pointer}
+    .send:disabled{opacity:.5;cursor:not-allowed}
+    .hint{color:#64748b;font-size:12px;margin-top:6px}
+    @media(min-width:900px){
+      .chat{min-height:55vh}
+    }
+  </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>Fox Stream Bot</h1>
-      <p class="subtitle">Soporte automático 24/7</p>
+      <div class="title">Fox Stream Bot</div>
+      <div class="subtitle">Soporte automático 24/7</div>
 
       <div id="chat" class="chat"></div>
 
-      <!-- IMPORTANTE: form para que ENTER funcione -->
-      <form id="chatForm" class="inputbar" autocomplete="off">
-        <input id="chatInput" type="text" placeholder='Tu número (solo dígitos) o escribe "hola"' />
-        <button id="sendBtn" type="submit">Enviar</button>
-      </form>
+      <div class="bar">
+        <input id="msg" class="in" type="text"
+          placeholder='Tu número (solo dígitos) o escribe "hola". Puedes escribir solo tus dígitos locales; no necesitas código de país.' />
+        <button id="send" class="send">Enviar</button>
+      </div>
+      <div class="hint">Sugerencia: en computadora puedes presionar <b>Enter</b> para enviar.</div>
     </div>
   </div>
 
-<script>
-/* ===== Config ===== */
-const SHEET_CSV =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
-const DEFAULT_COUNTRY = "51";       // anteponer si llega un móvil de 9 dígitos
+  <script>
+  // ================== CONFIG ==================
+  // URL publicada como CSV (Compartir > Publicar en la Web > Hoja 1 > CSV)
+  const SHEET_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
 
-/* ===== Estado ===== */
-let allowedPhones = new Set();      // teléfonos normalizados
-let phase = "awaiting_phone";       // awaiting_phone | menu
-let currentPhone = null;
+  // Cuántos dígitos mínimos debe escribir el cliente para validar
+  const MIN_LOCAL_DIGITS = 8; // usualmente 8–9; ajústalo si lo necesitas
+  // ============================================
 
-/* ===== Utilidades ===== */
-const chatEl = document.getElementById("chat");
-const inputEl = document.getElementById("chatInput");
-const formEl  = document.getElementById("chatForm");
-const sendBtn = document.getElementById("sendBtn");
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('msg');
+  const btn = document.getElementById('send');
 
-function scrollToBottom(){ chatEl.scrollTop = chatEl.scrollHeight; }
+  let customers = []; // {name, phoneDigits}
+  let verified = false;
 
-function addMsg(html, who="bot"){
-  const div = document.createElement("div");
-  div.className = "msg" + (who==="user" ? " user" : "");
-  div.innerHTML = html;
-  chatEl.appendChild(div);
-  scrollToBottom();
-}
+  function normalizeDigits(s) {
+    return (s || '').replace(/\D+/g, '');
+  }
 
-function normalizeNumber(raw){
-  // quita todo lo que no sea dígito
-  let n = (raw || "").toString().replace(/\D+/g,"");
-  // si parece un móvil peruano de 9 dígitos, anteponer 51
-  if(n.length === 9) n = DEFAULT_COUNTRY + n;
-  return n;
-}
+  function scrollToBottom() {
+    chat.scrollTop = chat.scrollHeight;
+  }
 
-async function fetchPhones(){
-  try{
-    const res = await fetch(SHEET_CSV, {cache:"no-store"});
-    const text = await res.text();
-    // Parse muy sencillo: asume 2 primeras columnas (Nombre, Teléfono)
-    const lines = text.replace(/^\uFEFF/,'').split(/\r?\n/);
-    const set = new Set();
-    for(let i=1;i<lines.length;i++){
-      const row = lines[i].split(",");
-      if(!row || row.length < 2) continue;
-      const phone = normalizeNumber(row[1]);
-      if(phone) set.add(phone);
+  function bubbleBot(html) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const b = document.createElement('div');
+    b.className = 'bot';
+    b.innerHTML = html;
+    row.appendChild(b);
+    chat.appendChild(row);
+    scrollToBottom();
+  }
+
+  function bubbleUser(text) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const b = document.createElement('div');
+    b.className = 'user';
+    b.textContent = text;
+    row.appendChild(b);
+    chat.appendChild(row);
+    scrollToBottom();
+  }
+
+  function askForPhone() {
+    bubbleBot('👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.');
+  }
+
+  function showMenu() {
+    const wrap = document.createElement('div');
+    wrap.className = 'btns row';
+    wrap.innerHTML = `
+      <div style="min-width:140px"><b>Selecciona una opción:</b></div>
+      <button class="chip" data-opt="1">1) Código de acceso temporal</button>
+      <button class="chip" data-opt="2">2) Actualizar tu Hogar</button>
+      <button class="chip" data-opt="3">3) Nueva solicitud de inicio (TV)</button>
+    `;
+    chat.appendChild(wrap);
+    wrap.querySelectorAll('.chip').forEach(ch => {
+      ch.addEventListener('click', () => handleOption(ch.dataset.opt));
+    });
+    scrollToBottom();
+  }
+
+  function afterFlowMessage() {
+    bubbleBot('Escribe "<b>hola</b>" para volver al menú principal.');
+  }
+
+  function handleOption(opt) {
+    const text = {
+      '1': 'Código de acceso temporal',
+      '2': 'Actualizar tu Hogar',
+      '3': 'Nueva solicitud de inicio (TV)'
+    }[opt] || 'Opción';
+    bubbleUser(text);
+
+    // Aquí pones la lógica real con tus sistemas.
+    if (opt === '1') {
+      bubbleBot('Tu código temporal es: <b>123-456</b> (demo).');
+    } else if (opt === '2') {
+      bubbleBot('Se ha registrado tu solicitud de actualización de hogar. Te avisaremos por WhatsApp cuando esté lista.');
+    } else if (opt === '3') {
+      bubbleBot('Hemos iniciado el proceso para tu nueva solicitud de inicio en TV. Te contactaremos por WhatsApp.');
     }
-    allowedPhones = set;
-  }catch(e){
-    console.error("Error leyendo CSV:", e);
+    afterFlowMessage();
   }
-}
 
-function showWelcome(){
-  addMsg("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
-}
+  function validatePhone(inputDigits) {
+    if (!inputDigits || inputDigits.length < MIN_LOCAL_DIGITS) {
+      bubbleBot(`Por favor escribe al menos <b>${MIN_LOCAL_DIGITS}</b> dígitos de tu número sin espacios.`);
+      return false;
+    }
 
-function showMenu(){
-  const html = `
-    <p><strong>Selecciona una opción:</strong></p>
-    <div>
-      <span class="pill" data-opt="codigo">1) Código de acceso temporal</span>
-      <span class="pill" data-opt="hogar">2) Actualizar tu Hogar</span>
-      <span class="pill" data-opt="nueva">3) Nueva solicitud de inicio (TV)</span>
-    </div>
-  `;
-  addMsg(html);
-  // delegación de eventos para las “pills”
-  chatEl.querySelectorAll('.pill').forEach(p => {
-    p.addEventListener('click', () => handleMenu(p.dataset.opt));
-  });
-}
-
-function endWithBackToMenu(){
-  addMsg(`Escribe <strong>"hola"</strong> para volver al menú principal.`);
-  phase = "menu"; // sigue en menú hasta que el usuario escriba hola de nuevo (refresca lista también)
-}
-
-function handleMenu(opt){
-  let rsp = "";
-  if(opt === "codigo"){
-    rsp = "🔐 Aquí tienes tu <strong>código temporal</strong>: <code>" +
-          Math.floor(100000 + Math.random()*900000) + "</code> (válido por 10 min).";
-  }else if(opt === "hogar"){
-    rsp = "🏠 Para actualizar tu hogar envíanos el ID del dispositivo o comunícate con soporte.";
-  }else if(opt === "nueva"){
-    rsp = "📺 Listo. Generaremos una nueva solicitud de inicio. Te avisaremos por WhatsApp cuando esté activa.";
-  }else{
-    rsp = "No entendí esa opción.";
-  }
-  addMsg(rsp);
-  endWithBackToMenu();
-}
-
-/* ===== Flujo principal ===== */
-async function processUserInput(raw){
-  const text = (raw || "").trim();
-  if(!text) return;
-
-  addMsg(text.replace(/</g,"&lt;"), "user");   // eco seguro
-
-  // Volver al menú
-  if(/^hola$/i.test(text)){
-    await fetchPhones();                       // refresca listado por si agregaste nuevos números
-    if(currentPhone){
-      addMsg("👋 Hola de nuevo. Menú principal:");
+    // Coincidencia por sufijo: si lo que escribe el cliente coincide
+    // con el final de algún teléfono de la lista, lo consideramos válido.
+    const found = customers.find(c => c.phoneDigits.endsWith(inputDigits));
+    if (found) {
+      verified = true;
+      bubbleBot('✅ <span class="ok">Número verificado. ¡Bienvenido!</span>');
       showMenu();
-      phase = "menu";
-    }else{
-      phase = "awaiting_phone";
-      showWelcome();
+      return true;
+    } else {
+      bubbleBot('❌ No encontramos tu número. Por favor, contacta al administrador para registrarte.');
+      return false;
     }
-    return;
   }
 
-  if(phase === "awaiting_phone"){
-    // intentamos validar como número
-    const n = normalizeNumber(text);
-    if(!n){
-      addMsg('Por favor, escribe solo números. Ej: <code>51987654321</code>.');
+  async function loadSheet() {
+    try {
+      const res = await fetch(SHEET_CSV_URL, {cache: 'no-store'});
+      const csv = await res.text();
+
+      // Parseo muy simple de CSV (2 columnas: Nombre, Teléfono)
+      // Si tu hoja puede tener comas en el nombre, sería mejor un parser CSV completo,
+      // pero para esta hoja simple funciona.
+      const rows = csv.split(/\r?\n/).filter(r => r.trim() !== '');
+      const header = rows.shift(); // "Nombre,Teléfono"
+      customers = rows.map(line => {
+        const parts = line.split(',');
+        const name = (parts[0] || '').trim();
+        const phoneDigits = normalizeDigits(parts[1] || '');
+        return { name, phoneDigits };
+      }).filter(r => r.phoneDigits.length > 0);
+    } catch (e) {
+      console.error(e);
+      bubbleBot('⚠️ No pude cargar la lista de clientes. Verifica el enlace CSV publicado.');
+    }
+  }
+
+  function resetToMenu() {
+    verified = true; // ya estaba verificado
+    showMenu();
+  }
+
+  async function start() {
+    await loadSheet();
+    askForPhone();
+    input.focus();
+  }
+
+  async function send() {
+    const raw = input.value.trim();
+    if (!raw) return;
+    input.value = '';
+
+    bubbleUser(raw);
+
+    if (/^hola$/i.test(raw)) {
+      if (verified) {
+        resetToMenu();
+      } else {
+        askForPhone();
+      }
       return;
     }
-    // validar
-    if(allowedPhones.has(n)){
-      currentPhone = n;
-      addMsg('<span class="ok">✔ Número verificado. ¡Bienvenido!</span>');
-      phase = "menu";
-      showMenu();
-    }else{
-      addMsg('<span class="err">✖ Tu número no está registrado.</span> ' +
-             'Por favor, ponte en contacto con el administrador.');
-      // permanece en awaiting_phone
+
+    if (!verified) {
+      const digits = normalizeDigits(raw);
+      validatePhone(digits);
+      return;
     }
-    return;
+
+    // Ya verificado => interpretar selección por número
+    const m = raw.match(/^[123]$/);
+    if (m) {
+      handleOption(m[0]);
+    } else {
+      bubbleBot('Por favor elige una opción válida (1, 2 o 3) o escribe "hola" para volver al menú.');
+    }
   }
 
-  if(phase === "menu"){
-    // también permitir escribir 1/2/3
-    const mapNum = { "1":"codigo", "2":"hogar", "3":"nueva" };
-    const opt = mapNum[text] || text.toLowerCase();
-    handleMenu(opt);
-    return;
-  }
-}
+  btn.addEventListener('click', send);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      send();
+    }
+  });
 
-/* ===== Eventos ===== */
-// Un solo handler para botón y Enter (submit del form)
-formEl.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const value = inputEl.value;
-  inputEl.value = "";
-  await processUserInput(value);
-});
-
-window.addEventListener("load", async () => {
-  await fetchPhones();
-  showWelcome();
-});
-</script>
+  start();
+  </script>
 </body>
 </html>
