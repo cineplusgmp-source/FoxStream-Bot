@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Fox Stream Bot</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+    h2 { text-align: center; color: #333; }
+    form { max-width: 400px; margin: auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 0 8px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 10px; }
+    input, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+    fieldset { margin-top: 15px; }
+    #resultado { margin-top: 20px; padding: 10px; border: 1px solid #ccc; border-radius: 5px; background: #f0f0f0; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+
+  <h2>Fox Stream Bot</h2>
+
+  <form id="foxForm">
+    <label for="celular">Celular</label>
+    <input type="tel" id="celular" name="celular" placeholder="+51 987654321" required>
+
+    <label for="correo">Correo</label>
+    <input type="email" id="correo" name="correo" placeholder="correo@ejemplo.com" required>
+
+    <fieldset>
+      <legend>Selecciona una opción</legend>
+      <label><input type="radio" name="opcion" value="1" checked> Código de acceso temporal</label>
+      <label><input type="radio" name="opcion" value="2"> Actualizar tu Hogar</label>
+      <label><input type="radio" name="opcion" value="3"> Nueva solicitud de inicio (TV)</label>
+    </fieldset>
+
+    <button type="submit">Enviar</button>
+  </form>
+
+  <div id="resultado"></div>
+
+  <script>
+    const form = document.getElementById('foxForm');
+    const resultado = document.getElementById('resultado');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const celular = document.getElementById('celular').value;
+      const correo = document.getElementById('correo').value;
+      const opcion = document.querySelector('input[name="opcion"]:checked').value;
+
+      resultado.innerText = "📱 Celular: " + celular +
+                            "\n📧 Correo: " + correo +
+                            "\n🔑 Opción seleccionada: " + opcion +
+                            "\n\n✅ (Aquí mostraremos la respuesta automática cuando conectemos el bot).";
+    });
+  </script>
+
+</body>
+</html>
