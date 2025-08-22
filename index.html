@@ -1,343 +1,285 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fox Stream Bot</title>
-  <style>
-    :root{
-      --bg:#f3f6fb;
-      --card:#ffffff;
-      --primary:#2563eb;
-      --primary-600:#1d4ed8;
-      --text:#0f172a;
-      --muted:#64748b;
-      --bubble:#eaf2ff;
-      --success:#22c55e;
-      --danger:#ef4444;
-      --shadow:0 10px 30px rgba(2,6,23,.08);
-      --radius:18px;
-      --maxw:980px;
-      --chatw:740px;
-    }
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-    .wrap{
-      max-width:var(--maxw);
-      margin:32px auto;
-      padding:0 16px;
-    }
-    h1{
-      margin:4px 0 2px;
-      text-align:center;
-      font-size:clamp(22px,3vw,30px);
-      letter-spacing:.2px;
-    }
-    .subtitle{
-      text-align:center;
-      color:var(--muted);
-      margin-bottom:18px;
-      font-size:14px;
-    }
-    .card{
-      background:var(--card);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:18px;
-      margin:0 auto;
-      max-width:var(--chatw);
-      display:flex;
-      flex-direction:column;
-      min-height:60vh;
-    }
-    .chat{
-      flex:1;
-      background:#fff;
-      border:1px solid #e5e7eb;
-      border-radius:16px;
-      padding:14px;
-      overflow:auto;
-      scroll-behavior:smooth;
-    }
-    .msg{
-      max-width:min(88%,560px);
-      background:var(--bubble);
-      padding:10px 12px;
-      border-radius:14px;
-      margin:8px 0;
-      box-shadow:0 1px 0 rgba(15,23,42,.03);
-    }
-    .msg small{color:var(--muted);display:block;margin-top:6px}
-    .bot{align-self:flex-start}
-    .user{align-self:flex-end;background:#eef2f7}
-    .row{
-      display:flex;gap:10px;align-items:center;margin-top:12px
-    }
-    input[type="text"]{
-      flex:1;
-      border:1px solid #dbe1ea;
-      background:#fff;
-      border-radius:12px;
-      padding:12px 14px;
-      font-size:16px;
-      outline:none;
-    }
-    input[type="text"]::placeholder{color:#9aa8bb}
-    button{
-      background:var(--primary);
-      color:#fff;border:0;border-radius:12px;
-      padding:12px 18px;font-weight:600;cursor:pointer
-    }
-    button:hover{background:var(--primary-600)}
-    .pill{
-      display:inline-block; border:1px solid #cfe0ff;background:#f6f9ff;
-      padding:8px 10px;border-radius:12px;margin:6px 6px 0 0;
-      cursor:pointer; user-select:none;
-    }
-    .pill:hover{background:#eef5ff}
-    .system{
-      display:inline-flex;align-items:center;gap:8px;
-      background:#eaf2ff;border:1px solid #d9e6ff;color:#0b3b8f;
-    }
-    .ok{color:var(--success)}
-    .error{color:#b91c1c}
-    .loading{opacity:.7}
-    .footer{margin-top:10px;font-size:12px;color:var(--muted);text-align:center}
-    @media (min-width:1024px){
-      .card{min-height:70vh}
-      .chat{padding:16px 18px}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fox Stream Bot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --primary:#1a73e8;
+    --bot:#e9f1ff;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --success:#0f9d58;
+    --danger:#d93025;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;
+    color:var(--text);
+  }
+  .wrap{
+    max-width:920px;
+    margin:24px auto;
+    padding:16px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:18px;
+    box-shadow:0 6px 22px rgba(0,0,0,.06);
+    padding:20px;
+  }
+  h1{
+    text-align:center;
+    margin:0 0 4px;
+  }
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    margin:0 0 16px;
+    font-size:14px;
+  }
+
+  /* Chat area */
+  .chat{
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:12px;
+    min-height:260px;           /* suficiente para que no se vea “vacío” */
+    max-height:60vh;            /* crece y luego hace scroll */
+    overflow:auto;
+  }
+  .msg{
+    display:inline-flex;
+    align-items:flex-start;
+    gap:.5rem;
+    background:var(--bot);
+    padding:10px 12px;
+    border-radius:10px;
+    margin:10px 0;
+    width:fit-content;
+    max-width:min(680px, 95%);
+  }
+  .msg.user{
+    background:#eef2f7;
+    margin-left:auto;
+  }
+  .msg p{margin:0}
+  .msg small{color:var(--muted)}
+
+  .inputbar{
+    display:flex; gap:10px; margin-top:12px;
+  }
+  .inputbar input{
+    flex:1;
+    padding:12px 14px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    font-size:15px;
+  }
+  .inputbar button{
+    background:var(--primary);
+    color:#fff;
+    border:0;
+    padding:0 18px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .pill{
+    display:inline-block;
+    padding:8px 10px;
+    border:1px solid #cfe1ff;
+    background:#f4f9ff;
+    border-radius:8px;
+    margin:6px 6px 0 0;
+    cursor:pointer;
+  }
+  .ok{color:var(--success);font-weight:600}
+  .err{color:var(--danger);font-weight:600}
+</style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Fox Stream Bot</h1>
-    <div class="subtitle">Soporte automático 24/7</div>
-
     <div class="card">
+      <h1>Fox Stream Bot</h1>
+      <p class="subtitle">Soporte automático 24/7</p>
+
       <div id="chat" class="chat"></div>
 
-      <div class="row">
-        <input id="input" type="text" placeholder='Tu número (solo dígitos) o escribe "hola"' autocomplete="off" />
-        <button id="send">Enviar</button>
-      </div>
-      <div class="footer">Escribe <b>hola</b> para reiniciar el flujo en cualquier momento.</div>
+      <!-- IMPORTANTE: form para que ENTER funcione -->
+      <form id="chatForm" class="inputbar" autocomplete="off">
+        <input id="chatInput" type="text" placeholder='Tu número (solo dígitos) o escribe "hola"' />
+        <button id="sendBtn" type="submit">Enviar</button>
+      </form>
     </div>
   </div>
 
-  <script>
-    // ========= CONFIG =========
-    // CSV publicado de tu Google Sheet (Hoja1: Nombre | Teléfono)
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
+<script>
+/* ===== Config ===== */
+const SHEET_CSV =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
+const DEFAULT_COUNTRY = "51";       // anteponer si llega un móvil de 9 dígitos
 
-    // País por defecto para normalizar (si tus números NO tienen prefijo)
-    const DEFAULT_COUNTRY = ""; // ejemplo: "51" para Perú, "57" CO, "52" MX. Déjalo "" si ya guardas con prefijo.
+/* ===== Estado ===== */
+let allowedPhones = new Set();      // teléfonos normalizados
+let phase = "awaiting_phone";       // awaiting_phone | menu
+let currentPhone = null;
 
-    // ========= ESTADO =========
-    const state = {
-      step: "askPhone",     // askPhone -> validated -> menu -> action
-      phoneOk: false,
-      phone: "",
-      csvPhones: new Set(), // teléfonos normalizados desde el sheet
-      csvMap: new Map()     // phone -> nombre (opcional)
-    };
+/* ===== Utilidades ===== */
+const chatEl = document.getElementById("chat");
+const inputEl = document.getElementById("chatInput");
+const formEl  = document.getElementById("chatForm");
+const sendBtn = document.getElementById("sendBtn");
 
-    // ========= UI HELPERS =========
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("input");
-    const sendBtn = document.getElementById("send");
+function scrollToBottom(){ chatEl.scrollTop = chatEl.scrollHeight; }
 
-    function scrollBottom(){ chat.scrollTop = chat.scrollHeight; }
+function addMsg(html, who="bot"){
+  const div = document.createElement("div");
+  div.className = "msg" + (who==="user" ? " user" : "");
+  div.innerHTML = html;
+  chatEl.appendChild(div);
+  scrollToBottom();
+}
 
-    function bubble(text, who="bot", extraClass=""){
-      const div = document.createElement("div");
-      div.className = `msg ${who} ${extraClass}`;
-      div.innerHTML = text;
-      chat.appendChild(div);
-      scrollBottom();
-      return div;
+function normalizeNumber(raw){
+  // quita todo lo que no sea dígito
+  let n = (raw || "").toString().replace(/\D+/g,"");
+  // si parece un móvil peruano de 9 dígitos, anteponer 51
+  if(n.length === 9) n = DEFAULT_COUNTRY + n;
+  return n;
+}
+
+async function fetchPhones(){
+  try{
+    const res = await fetch(SHEET_CSV, {cache:"no-store"});
+    const text = await res.text();
+    // Parse muy sencillo: asume 2 primeras columnas (Nombre, Teléfono)
+    const lines = text.replace(/^\uFEFF/,'').split(/\r?\n/);
+    const set = new Set();
+    for(let i=1;i<lines.length;i++){
+      const row = lines[i].split(",");
+      if(!row || row.length < 2) continue;
+      const phone = normalizeNumber(row[1]);
+      if(phone) set.add(phone);
     }
+    allowedPhones = set;
+  }catch(e){
+    console.error("Error leyendo CSV:", e);
+  }
+}
 
-    function sys(text){
-      bubble(`👋 ${text}`,"bot","system");
-    }
+function showWelcome(){
+  addMsg("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
+}
 
-    function sanitizePhone(raw){
-      if(!raw) return "";
-      let s = String(raw).replace(/[^\d]/g,""); // quita todo menos dígitos
-      // si definiste DEFAULT_COUNTRY y el número parece local (ej. 9-10 dígitos) puedes decidir anteponer:
-      if(DEFAULT_COUNTRY && (s.length===9 || s.length===10)){
-        s = DEFAULT_COUNTRY + s;
-      }
-      return s;
-    }
+function showMenu(){
+  const html = `
+    <p><strong>Selecciona una opción:</strong></p>
+    <div>
+      <span class="pill" data-opt="codigo">1) Código de acceso temporal</span>
+      <span class="pill" data-opt="hogar">2) Actualizar tu Hogar</span>
+      <span class="pill" data-opt="nueva">3) Nueva solicitud de inicio (TV)</span>
+    </div>
+  `;
+  addMsg(html);
+  // delegación de eventos para las “pills”
+  chatEl.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => handleMenu(p.dataset.opt));
+  });
+}
 
-    // ========= CSV LOADER =========
-    async function loadPhones(){
-      try{
-        const res = await fetch(SHEET_CSV_URL, {cache:"no-store"});
-        const csv = await res.text();
-        // Parse simple CSV (Nombre,Telefono)
-        // Dividimos por líneas; ignoramos encabezado (primera línea)
-        const lines = csv.trim().split(/\r?\n/);
-        lines.slice(1).forEach(line=>{
-          // Cuidado con nombres que contengan coma; en tu sheet no se ve, así que split simple:
-          const parts = line.split(",");
-          if(parts.length>=2){
-            const name = parts[0].trim();
-            const phone = sanitizePhone(parts[1]);
-            if(phone){
-              state.csvPhones.add(phone);
-              state.csvMap.set(phone, name || "");
-            }
-          }
-        });
-      }catch(e){
-        bubble(`⚠️ <b>Error al leer la lista de clientes.</b> Intenta recargar la página.`, "bot", "error");
-        console.error(e);
-      }
-    }
+function endWithBackToMenu(){
+  addMsg(`Escribe <strong>"hola"</strong> para volver al menú principal.`);
+  phase = "menu"; // sigue en menú hasta que el usuario escriba hola de nuevo (refresca lista también)
+}
 
-    // ========= FLUJOS =========
-    function showMenu(){
-      state.step = "menu";
-      const menu = [
-        ["1) Código de acceso temporal","code"],
-        ["2) Actualizar tu Hogar","home"],
-        ["3) Nueva solicitud de inicio (TV)","newtv"]
-      ];
-      const container = document.createElement("div");
-      container.className = "msg bot";
-      container.innerHTML = `<div><b>Selecciona una opción:</b></div>`;
-      menu.forEach(([label,key])=>{
-        const pill = document.createElement("span");
-        pill.className = "pill";
-        pill.textContent = label;
-        pill.onclick = ()=>handleMenu(key);
-        container.appendChild(pill);
-      });
-      chat.appendChild(container);
-      scrollBottom();
-    }
+function handleMenu(opt){
+  let rsp = "";
+  if(opt === "codigo"){
+    rsp = "🔐 Aquí tienes tu <strong>código temporal</strong>: <code>" +
+          Math.floor(100000 + Math.random()*900000) + "</code> (válido por 10 min).";
+  }else if(opt === "hogar"){
+    rsp = "🏠 Para actualizar tu hogar envíanos el ID del dispositivo o comunícate con soporte.";
+  }else if(opt === "nueva"){
+    rsp = "📺 Listo. Generaremos una nueva solicitud de inicio. Te avisaremos por WhatsApp cuando esté activa.";
+  }else{
+    rsp = "No entendí esa opción.";
+  }
+  addMsg(rsp);
+  endWithBackToMenu();
+}
 
-    function endWithRestart(){
-      bubble(`✅ Listo. <br>Escribe <b>"hola"</b> para volver al menú principal.`, "bot");
-      state.step = "validated"; // ya está validado; si pone hola, lo llevamos al menú
-      input.placeholder = 'Escribe "hola" para volver al menú';
-    }
+/* ===== Flujo principal ===== */
+async function processUserInput(raw){
+  const text = (raw || "").trim();
+  if(!text) return;
 
-    async function handleMenu(key){
-      state.step = "action";
-      if(key==="code"){
-        bubble("1) Código de acceso temporal", "user");
-        // Aquí iría tu integración real (API/Proveedores).
-        await new Promise(r=>setTimeout(r,600));
-        bubble("🔐 Tu código de acceso temporal es: <b>934231163</b> (demo).", "bot");
-        endWithRestart();
-      }else if(key==="home"){
-        bubble("2) Actualizar tu Hogar", "user");
-        await new Promise(r=>setTimeout(r,600));
-        bubble("🏠 Hogar actualizado correctamente (demo).", "bot");
-        endWithRestart();
-      }else if(key==="newtv"){
-        bubble("3) Nueva solicitud de inicio (TV)", "user");
-        await new Promise(r=>setTimeout(r,600));
-        bubble("📺 Enviamos un enlace de inicio de sesión a tu TV (demo).", "bot");
-        endWithRestart();
-      }
-    }
+  addMsg(text.replace(/</g,"&lt;"), "user");   // eco seguro
 
-    function resetToAskPhone(){
-      state.step = "askPhone";
-      state.phoneOk = false;
-      state.phone = "";
-      input.value = "";
-      input.placeholder = "Tu número (solo dígitos)";
-      chat.innerHTML = ""; // limpiamos conversación para que no quede un lienzo vacío fijo
-      sys("¡Hola! Escribe tu número de teléfono para validar tu acceso.");
-    }
-
-    function afterValidated(){
-      const name = state.csvMap.get(state.phone) || "";
-      bubble(`☑️ Número verificado ${name ? "para <b>"+name+"</b>": ""}. ¡Bienvenido!`, "bot", "ok");
+  // Volver al menú
+  if(/^hola$/i.test(text)){
+    await fetchPhones();                       // refresca listado por si agregaste nuevos números
+    if(currentPhone){
+      addMsg("👋 Hola de nuevo. Menú principal:");
       showMenu();
+      phase = "menu";
+    }else{
+      phase = "awaiting_phone";
+      showWelcome();
     }
+    return;
+  }
 
-    // ========= HANDLER PRINCIPAL =========
-    async function onUserSend(){
-      const raw = input.value.trim();
-      if(!raw) return;
-
-      // mostrar lo que escribió el usuario
-      bubble(raw, "user");
-      input.value = "";
-
-      // Comandos
-      const lower = raw.toLowerCase();
-      if(lower==="hola" || lower==="menu" || lower==="inicio"){
-        if(state.phoneOk){
-          // ya validado -> mostrar menú
-          showMenu();
-        }else{
-          resetToAskPhone();
-        }
-        return;
-      }
-
-      if(state.step==="askPhone"){
-        const phone = sanitizePhone(raw);
-        if(!phone || phone.length < 7){
-          bubble("❌ Ingresa un número válido (solo dígitos).", "bot", "error");
-          return;
-        }
-        state.phone = phone;
-        // validación con el set de teléfonos
-        const checking = bubble("Verificando número...", "bot", "loading");
-        await new Promise(r=>setTimeout(r,250)); // micro delay para que se vea el estado
-        checking.remove();
-
-        if(state.csvPhones.has(phone)){
-          state.phoneOk = true;
-          state.step = "validated";
-          afterValidated();
-        }else{
-          bubble("❌ Tu número no está registrado. Por favor contacta al administrador.", "bot", "error");
-          bubble('Cuando lo agreguen, escribe <b>"hola"</b> para intentarlo de nuevo.', "bot");
-          state.step = "blocked";
-          input.placeholder = 'Escribe "hola" para reintentar';
-        }
-        return;
-      }
-
-      if(state.step==="menu"){
-        // permitir que el usuario escriba 1,2,3 en vez de pulsar los botones
-        const map = { "1":"code", "2":"home", "3":"newtv" };
-        if(map[lower]) return handleMenu(map[lower]);
-        bubble('Elige 1, 2 o 3, o usa los botones azules.', "bot");
-        return;
-      }
-
-      if(state.step==="action" || state.step==="validated"){
-        bubble('Escribe <b>"hola"</b> para volver al menú principal.', "bot");
-      }
+  if(phase === "awaiting_phone"){
+    // intentamos validar como número
+    const n = normalizeNumber(text);
+    if(!n){
+      addMsg('Por favor, escribe solo números. Ej: <code>51987654321</code>.');
+      return;
     }
+    // validar
+    if(allowedPhones.has(n)){
+      currentPhone = n;
+      addMsg('<span class="ok">✔ Número verificado. ¡Bienvenido!</span>');
+      phase = "menu";
+      showMenu();
+    }else{
+      addMsg('<span class="err">✖ Tu número no está registrado.</span> ' +
+             'Por favor, ponte en contacto con el administrador.');
+      // permanece en awaiting_phone
+    }
+    return;
+  }
 
-    // ========= INIT =========
-    (async function init(){
-      sys("¡Hola! Escribe tu número de teléfono para validar tu acceso.");
-      await loadPhones();
-      input.focus();
-    })();
+  if(phase === "menu"){
+    // también permitir escribir 1/2/3
+    const mapNum = { "1":"codigo", "2":"hogar", "3":"nueva" };
+    const opt = mapNum[text] || text.toLowerCase();
+    handleMenu(opt);
+    return;
+  }
+}
 
-    sendBtn.addEventListener("click", onUserSend);
-    input.addEventListener("keydown", (e)=>{ if(e.key==="Enter") onUserSend(); });
-  </script>
+/* ===== Eventos ===== */
+// Un solo handler para botón y Enter (submit del form)
+formEl.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const value = inputEl.value;
+  inputEl.value = "";
+  await processUserInput(value);
+});
+
+window.addEventListener("load", async () => {
+  await fetchPhones();
+  showWelcome();
+});
+</script>
 </body>
 </html>
