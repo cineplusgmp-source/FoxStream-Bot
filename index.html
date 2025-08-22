@@ -148,9 +148,9 @@ function resetToMenu(){
 
 function inicio(){
   chat.innerHTML = '';
-  addBot('👋 ¡Hola! Escribe tu número de teléfono para validar acceso.', true);
-  estado = { fase: "inicio", telefono: null };
-  input.placeholder = 'Escribe aquí… (ej: hola)';
+  addBot('👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.');
+  estado = { fase: "esperando_tel", telefono: null };
+  input.placeholder = 'Tu número (solo dígitos)';
 }
 
 async function onMessage(text){
@@ -241,4 +241,5 @@ form.addEventListener('submit', (e)=>{
 </script>
 </body>
 </html>
+
 
