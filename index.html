@@ -1,245 +1,198 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fox Stream Bot</title>
-<!-- Fuente y reset simple -->
-<style>
-  :root{
-    --bg:#f3f5f7; --card:#ffffff; --text:#0f172a; --muted:#64748b;
-    --brand:#2563eb; --brand-weak:#e0ecff; --ok:#16a34a; --err:#dc2626;
-    --bubble:#e9f0ff;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background:var(--bg); color:var(--text); font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    display:flex; justify-content:center;
-  }
-  /* Contenedor tipo chat: se ve igual en móvil y desktop (máx 480px) */
-  .app{
-    width:100%; max-width:480px; min-height:100vh; padding:16px; display:flex; flex-direction:column; gap:12px;
-  }
-  header{ text-align:center; }
-  h1{ font-size:1.6rem; margin:.2rem 0 .1rem }
-  .sub{ color:var(--muted); font-size:.9rem }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fox Stream Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-  .chat{
-    background:var(--card); border-radius:16px; padding:12px; flex:1; display:flex; flex-direction:column; gap:10px;
-    box-shadow:0 2px 12px rgba(0,0,0,.06);
-  }
-  .row{ display:flex; gap:8px; }
-  .bot{ justify-content:flex-start; }
-  .me{ justify-content:flex-end; }
-  .bubble{
-    max-width:80%; padding:10px 12px; border-radius:14px; background:var(--bubble);
-  }
-  .me .bubble{ background:#e5e7eb; }
-  .muted{ color:var(--muted) }
-  .ok{ color:var(--ok); font-weight:600 }
-  .err{ color:var(--err); font-weight:600 }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 420px; /* por defecto estilo móvil */
+      display: flex;
+      flex-direction: column;
+    }
 
-  .choices{ display:flex; flex-direction:column; gap:8px; }
-  .chip{
-    display:inline-block; padding:10px 12px; border-radius:12px; border:1px solid var(--brand);
-    color:var(--brand); background:var(--brand-weak); cursor:pointer; user-select:none;
-  }
-  .inputBar{
-    display:flex; gap:8px; align-items:center; background:var(--card); padding:10px; border-radius:12px;
-    box-shadow:0 2px 12px rgba(0,0,0,.06);
-  }
-  input[type=text]{
-    flex:1; border:none; outline:none; font:inherit; padding:8px 6px;
-  }
-  button{
-    background:var(--brand); color:#fff; border:none; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600;
-  }
-  button:disabled{ opacity:.6; cursor:not-allowed }
-  /* micro mejoras en desktop */
-  @media (min-width: 700px){
-    body{ padding:24px 0 }
-  }
-</style>
+    h2 {
+      text-align: center;
+      color: #1a1a1a;
+    }
+    h4 {
+      text-align: center;
+      color: #777;
+      margin-top: -10px;
+    }
+
+    .chat-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .message {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+
+    .bot {
+      background: #e8f0fe;
+      color: #333;
+      align-self: flex-start;
+    }
+
+    .user {
+      background: #d1ffd6;
+      color: #333;
+      align-self: flex-end;
+    }
+
+    .input-box {
+      display: flex;
+    }
+
+    .input-box input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px 0 0 8px;
+    }
+
+    .input-box button {
+      padding: 10px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 0 8px 8px 0;
+      cursor: pointer;
+    }
+
+    .input-box button:hover {
+      background: #0056b3;
+    }
+
+    /* Responsive: PC */
+    @media (min-width: 900px) {
+      .container {
+        max-width: 800px;
+      }
+      .chat-box {
+        height: 600px;
+      }
+      .message {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="app">
-    <header>
-      <h1>Fox Stream Bot</h1>
-      <div class="sub">Soporte automático 24/7</div>
-    </header>
+  <div class="container">
+    <h2>Fox Stream Bot</h2>
+    <h4>Soporte automático 24/7</h4>
 
-    <section id="chat" class="chat" aria-live="polite"></section>
+    <div class="chat-box" id="chat"></div>
 
-    <form id="bar" class="inputBar" autocomplete="off">
-      <input id="msg" type="text" placeholder='Escribe aquí… (ej: hola)' />
-      <button id="send" type="submit">Enviar</button>
-    </form>
-  </main>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Tu número (solo dígitos)">
+      <button onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
 
-<script>
-/* ============================
-   1) Lista de clientes permitidos
-   - Reemplaza estos teléfonos por los tuyos (sin espacios ni guiones).
-   - Acepta con o sin +, y con o sin código de país; normalizamos.
-============================ */
-const CLIENTES = [
-  "5195602221","50232383893","51990037255","51910303715","519457451959","51908434802",
-  "519602022891","519563022221","519607518762","519680149842","510743023389","502333238393",
-  "518985073553","505809875353","506838475353","50583208221","502333283093","50584469802",
-  "519482141112","502333283093","519432031205","519423021035","519293358940","519023358940",
-  "502333283093","519850622221","519563022221","519808322006"
-];
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("userInput");
 
-/* ============================
-   2) Estado de conversación
-============================ */
-let estado = {
-  fase: "inicio",      // inicio -> esperando_tel -> verificado -> menu -> tarea -> fin
-  telefono: null
-};
+    // lista de clientes autorizados
+    const clientes = ["5195602221", "5194761111", "5023238393"];
 
-const chat = document.getElementById('chat');
-const input = document.getElementById('msg');
-const form = document.getElementById('bar');
+    let estado = { fase: "inicio", telefono: null };
 
-/* Utilidades */
-const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
-const norm = (raw) => (raw||"")
-  .replace(/[^\d+]/g,'')     // deja dígitos y +
-  .replace(/^00/,'+')
-  .replace(/^(\+?51|\+?502)?/, '') // quita código país más usados por ti (ajusta según necesites)
-  .replace(/^\+/, '')        // quita + si quedó al inicio
-  .replace(/^0+/, '');       // quita ceros iniciales
+    function addMessage(text, sender="bot"){
+      let div = document.createElement("div");
+      div.classList.add("message", sender);
+      div.innerHTML = text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
 
-function addBot(text, html=false){
-  const row = document.createElement('div'); row.className='row bot';
-  const b = document.createElement('div'); b.className='bubble';
-  if(html){ b.innerHTML = text } else { b.textContent = text }
-  row.appendChild(b); chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-}
-function addUser(text){
-  const row = document.createElement('div'); row.className='row me';
-  const b = document.createElement('div'); b.className='bubble'; b.textContent = text;
-  row.appendChild(b); chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-}
-function addChoices(items){
-  const row = document.createElement('div'); row.className='row bot';
-  const b = document.createElement('div'); b.className='bubble';
-  const box = document.createElement('div'); box.className='choices';
-  items.forEach(({label, value})=>{
-    const chip = document.createElement('div'); chip.className='chip'; chip.textContent = label;
-    chip.onclick = ()=> onChoice(value, label);
-    box.appendChild(chip);
-  });
-  b.appendChild(box); row.appendChild(b); chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-}
+    function addBot(text){ addMessage(text, "bot"); }
+    function addUser(text){ addMessage(text, "user"); }
 
-/* ============================
-   3) Flujo de conversación
-============================ */
-function resetToMenu(){
-  estado.fase = "menu";
-  addChoices([
-    {label:"1) Código de acceso temporal", value:"codigo"},
-    {label:"2) Actualizar tu Hogar",       value:"hogar"},
-    {label:"3) Nueva solicitud de inicio (TV)", value:"inicio"}
-  ]);
-}
-
-function inicio(){
-  chat.innerHTML = '';
-  addBot('👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.');
-  estado = { fase: "esperando_tel", telefono: null };
-  input.placeholder = 'Tu número (solo dígitos)';
-}
-
-async function onMessage(text){
-  const msg = text.trim();
-  if(!msg) return;
-
-  // Mostrar yo
-  addUser(msg);
-
-  if(estado.fase === "inicio"){
-    if(msg.toLowerCase() === 'hola'){
-      estado.fase = "esperando_tel";
-      await sleep(200);
-      addBot('Escribe tu número de teléfono para validar acceso.');
+    function inicio(){
+      chat.innerHTML = '';
+      addBot("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
+      estado = { fase: "esperando_tel", telefono: null };
       input.placeholder = 'Tu número (solo dígitos)';
-    }else{
-      addBot('Escribe <b>hola</b> para empezar.', true);
     }
-    return;
-  }
 
-  if(estado.fase === "esperando_tel"){
-    const tel = norm(msg);
-    if(!tel){ addBot('Formato no válido. Intenta nuevamente.'); return; }
+    function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+      addUser(text);
+      input.value = "";
 
-    const existe = CLIENTES.map(norm).includes(tel);
-    if(existe){
-      estado.fase = "verificado"; estado.telefono = tel;
-      addBot('✅ Número verificado. ¡Bienvenido!');
-      await sleep(250);
-      resetToMenu();
-    }else{
-      addBot('❌ Tu número no está registrado. Contacta al administrador.');
-      await sleep(250);
-      addBot('Escribe <b>hola</b> para volver al menú principal.', true);
-      estado.fase = "fin";
+      if(estado.fase === "esperando_tel"){
+        if(clientes.includes(text)){
+          estado.telefono = text;
+          estado.fase = "menu";
+          addBot("✅ Número verificado. ¡Bienvenido!");
+          mostrarMenu();
+        } else {
+          addBot("❌ Tu número no está registrado. Por favor contacta al administrador.");
+          inicio();
+        }
+      } else if(estado.fase === "menu"){
+        if(text === "1"){
+          addBot("🔑 Aquí tienes tu código de acceso temporal: 123456");
+          reinicioMenu();
+        } else if(text === "2"){
+          addBot("🏠 Actualización de hogar procesada con éxito.");
+          reinicioMenu();
+        } else if(text === "3"){
+          addBot("📺 Nueva solicitud de inicio (TV) registrada.");
+          reinicioMenu();
+        } else {
+          addBot("❌ Opción inválida. Escribe 1, 2 o 3.");
+        }
+      }
     }
-    return;
-  }
 
-  if(estado.fase === "menu"){
-    // permitir que el usuario también escriba 1/2/3
-    const m = msg.toLowerCase();
-    if(['1','codigo','código','codigo de acceso temporal','código de acceso temporal'].includes(m)) return onChoice('codigo','Código de acceso temporal');
-    if(['2','hogar','actualizar tu hogar'].includes(m)) return onChoice('hogar','Actualizar tu Hogar');
-    if(['3','inicio','nueva solicitud de inicio','nueva solicitud de inicio (tv)','tv'].includes(m)) return onChoice('inicio','Nueva solicitud de inicio (TV)');
-    addBot('Elige una opción tocando un botón o escribe 1, 2 o 3.');
-    return;
-  }
+    function mostrarMenu(){
+      addBot(`Selecciona una opción:<br>
+        1) Código de acceso temporal<br>
+        2) Actualizar tu Hogar<br>
+        3) Nueva solicitud de inicio (TV)`);
+      input.placeholder = "Escribe el número de la opción";
+    }
 
-  if(estado.fase === "tarea" || estado.fase === "fin"){
-    if(msg.toLowerCase() === 'hola'){ return inicio(); }
-  }
-}
+    function reinicioMenu(){
+      addBot("🔄 Escribe tu número de teléfono para validar tu acceso nuevamente.");
+      estado = { fase: "esperando_tel", telefono: null };
+      input.placeholder = "Tu número (solo dígitos)";
+    }
 
-async function onChoice(value,label){
-  addUser(label);
-  estado.fase = "tarea";
-
-  // Aquí simula la respuesta. Luego integraremos el backend real.
-  await sleep(300);
-  if(value==='codigo'){
-    addBot('🔐 En unos momentos te enviaremos el código de acceso temporal a tu TV / correo asociado.');
-  }
-  if(value==='hogar'){
-    addBot('🏠 Se programó la actualización de tu Hogar. Si la TV lo solicita, confirma desde la app.');
-  }
-  if(value==='inicio'){
-    addBot('📺 Te enviaremos un enlace de inicio de sesión a tu email/WhatsApp para activar tu TV.');
-  }
-
-  await sleep(250);
-  addBot('Escribe <b>hola</b> para volver al menú principal.', true);
-  estado.fase = "fin";
-}
-
-/* ============================
-   4) Arranque
-============================ */
-inicio();
-
-form.addEventListener('submit', (e)=>{
-  e.preventDefault();
-  const text = input.value;
-  input.value = '';
-  onMessage(text);
-});
-</script>
+    // iniciar conversación
+    inicio();
+  </script>
 </body>
 </html>
-
-
