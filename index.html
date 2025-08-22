@@ -1,244 +1,352 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fox Stream Bot</title>
   <style>
     :root{
-      --bg:#f4f6f8;
-      --card:#ffffff;
-      --primary:#2563eb;
-      --primary-weak:#e8f0ff;
-      --text:#0f172a;
-      --muted:#64748b;
-      --ok:#16a34a;
-      --bubble:#e9f1ff;
+      --bg:#f3f6fb; --card:#ffffff; --primary:#1b62ff; --ink:#0f172a;
+      --bubble:#e9f1ff; --ok:#16a34a; --muted:#64748b; --ring:#dbe7ff;
       --radius:16px;
     }
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial;}
-    .wrap{max-width:960px;margin:28px auto;padding:0 16px;}
-    .card{background:var(--card);border-radius:24px;padding:24px;box-shadow:0 6px 24px rgba(15,23,42,.06)}
-    .title{font-size:clamp(22px,3.3vw,38px);font-weight:800;letter-spacing:.3px;text-align:center;margin:4px 0 2px}
-    .subtitle{font-size:14px;color:var(--muted);text-align:center;margin-bottom:18px}
-    .chat{border:1px solid #e7e9ee;border-radius:20px;min-height:48vh;max-height:74vh;overflow:auto;background:#fff;padding:16px}
-    .row{display:flex;gap:10px;margin:10px 0}
-    .bot{background:var(--bubble);border-radius:14px;padding:10px 12px;max-width:90%;box-shadow:inset 0 0 0 1px rgba(37,99,235,.06)}
-    .user{background:#eef2ff;border-radius:14px;padding:8px 10px;font-size:14px;color:#334155}
-    .ok{color:#0a7e34;font-weight:700}
-    .btns{background:#edf2ff;border:1px solid #dbe7ff;border-radius:14px;padding:12px;display:flex;flex-wrap:wrap;gap:10px}
-    .chip{border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;background:#fff;cursor:pointer}
-    .chip:hover{background:#f1f5ff;border-color:#94a3b8}
-    .bar{display:flex;gap:10px;margin-top:14px}
-    .in{flex:1;border:1px solid #dfe3ea;border-radius:12px;padding:12px 14px;font-size:15px}
-    .send{background:var(--primary);color:#fff;border:0;border-radius:12px;padding:0 16px;font-weight:600;cursor:pointer}
-    .send:disabled{opacity:.5;cursor:not-allowed}
-    .hint{color:#64748b;font-size:12px;margin-top:6px}
-    @media(min-width:900px){
-      .chat{min-height:55vh}
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color:var(--ink); background:var(--bg);
+    }
+    .wrap{
+      max-width:980px; margin-inline:auto; padding:28px 16px;
+    }
+    header{
+      text-align:center; margin-bottom:16px;
+    }
+    header h1{ font-size:clamp(24px, 3vw, 36px); margin:0 0 6px}
+    header p{ color:var(--muted); margin:0; font-size:14px}
+    .card{
+      background:var(--card); border-radius:24px; padding:14px;
+      box-shadow:0 10px 30px rgba(16,24,40,.08);
+      border:1px solid #eef2ff;
+    }
+    .chat{
+      border:1px solid var(--ring); border-radius:18px; padding:12px;
+      min-height:min(62vh, 560px); max-height:70vh; overflow:auto;
+      background:#fff;
+    }
+    .row{display:flex; gap:10px; margin-top:10px}
+    .bot,.me{
+      max-width:min(95%,720px); padding:10px 12px; border-radius:12px;
+      line-height:1.35; font-size:15px;
+    }
+    .bot{background:var(--bubble)}
+    .me{background:#eef2ff}
+    .pill{background:#e8efff; padding:4px 10px; border-radius:20px; display:inline-block}
+    .ok{color:#0f5132; background:#dcfce7; border:1px solid #86efac}
+    .choices{background:#eef4ff; border:1px dashed #c7d6ff; border-radius:14px; padding:12px}
+    .choices .btn{
+      display:inline-block; margin:6px 8px 0 0; border:1px solid #cfe0ff; border-radius:12px;
+      padding:10px 12px; cursor:pointer; background:#fff; font-size:14px;
+    }
+    .composer{
+      margin-top:12px; display:flex; gap:10px; align-items:center;
+    }
+    input[type="text"]{
+      flex:1; padding:14px 14px; border:1px solid var(--ring); border-radius:12px;
+      font-size:15px; outline:none;
+    }
+    input[type="text"]:focus{border-color:var(--primary); box-shadow:0 0 0 3px rgba(27,98,255,.15)}
+    button{
+      border:none; background:var(--primary); color:#fff; padding:12px 16px; border-radius:12px;
+      cursor:pointer; font-weight:600;
+    }
+    .muted{color:var(--muted)}
+    @media (max-width:640px){
+      .chat{min-height:50vh; max-height:62vh}
+      .choices .btn{display:block}
     }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <header>
+      <h1>Fox Stream Bot</h1>
+      <p>Soporte automático 24/7</p>
+    </header>
+
     <div class="card">
-      <div class="title">Fox Stream Bot</div>
-      <div class="subtitle">Soporte automático 24/7</div>
-
-      <div id="chat" class="chat"></div>
-
-      <div class="bar">
-        <input id="msg" class="in" type="text"
-          placeholder='Tu número (solo dígitos) o escribe "hola". Puedes escribir solo tus dígitos locales; no necesitas código de país.' />
-        <button id="send" class="send">Enviar</button>
+      <div id="chat" class="chat" aria-live="polite" aria-label="Conversación">
+        <!-- Mensaje inicial -->
+        <div class="row">
+          <div class="bot">👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.</div>
+        </div>
       </div>
-      <div class="hint">Sugerencia: en computadora puedes presionar <b>Enter</b> para enviar.</div>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <input
+          id="input"
+          type="text"
+          inputmode="numeric"
+          placeholder='Escribe tu número de teléfono (solo dígitos)'
+          aria-label='Escribe tu número de teléfono (solo dígitos)'
+        />
+        <button type="submit">Enviar</button>
+      </form>
     </div>
   </div>
 
   <script>
-  // ================== CONFIG ==================
-  // URL publicada como CSV (Compartir > Publicar en la Web > Hoja 1 > CSV)
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
+    // 👉 Pega aquí el enlace CSV de tu Google Sheet publicado:
+    // (Archivo > Compartir > Publicar en la Web > Hoja 1 > "Valores separados por comas (CSV)")
+    const SHEET_CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
 
-  // Cuántos dígitos mínimos debe escribir el cliente para validar
-  const MIN_LOCAL_DIGITS = 8; // usualmente 8–9; ajústalo si lo necesitas
-  // ============================================
+    // Estado de la conversación
+    const State = {
+      step: "await_phone", // await_phone -> menu -> flow_1_phone -> flow_1_email -> done
+      verifiedPhone: null,
+      pendingChoice: null, // "1" | "2" | "3"
+      tmpPhoneForFlow: null,
+      db: [] // [{name, phoneRaw, phoneTail}]
+    };
 
-  const chat = document.getElementById('chat');
-  const input = document.getElementById('msg');
-  const btn = document.getElementById('send');
+    const $chat   = document.getElementById("chat");
+    const $form   = document.getElementById("composer");
+    const $input  = document.getElementById("input");
 
-  let customers = []; // {name, phoneDigits}
-  let verified = false;
+    // --- Utils ---
+    const sleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+    const toDigits = (s)=> (s||"").replace(/\D+/g,"");
+    const lastNDigits = (s, n)=> toDigits(s).slice(-n);
 
-  function normalizeDigits(s) {
-    return (s || '').replace(/\D+/g, '');
-  }
-
-  function scrollToBottom() {
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function bubbleBot(html) {
-    const row = document.createElement('div');
-    row.className = 'row';
-    const b = document.createElement('div');
-    b.className = 'bot';
-    b.innerHTML = html;
-    row.appendChild(b);
-    chat.appendChild(row);
-    scrollToBottom();
-  }
-
-  function bubbleUser(text) {
-    const row = document.createElement('div');
-    row.className = 'row';
-    const b = document.createElement('div');
-    b.className = 'user';
-    b.textContent = text;
-    row.appendChild(b);
-    chat.appendChild(row);
-    scrollToBottom();
-  }
-
-  function askForPhone() {
-    bubbleBot('👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.');
-  }
-
-  function showMenu() {
-    const wrap = document.createElement('div');
-    wrap.className = 'btns row';
-    wrap.innerHTML = `
-      <div style="min-width:140px"><b>Selecciona una opción:</b></div>
-      <button class="chip" data-opt="1">1) Código de acceso temporal</button>
-      <button class="chip" data-opt="2">2) Actualizar tu Hogar</button>
-      <button class="chip" data-opt="3">3) Nueva solicitud de inicio (TV)</button>
-    `;
-    chat.appendChild(wrap);
-    wrap.querySelectorAll('.chip').forEach(ch => {
-      ch.addEventListener('click', () => handleOption(ch.dataset.opt));
-    });
-    scrollToBottom();
-  }
-
-  function afterFlowMessage() {
-    bubbleBot('Escribe "<b>hola</b>" para volver al menú principal.');
-  }
-
-  function handleOption(opt) {
-    const text = {
-      '1': 'Código de acceso temporal',
-      '2': 'Actualizar tu Hogar',
-      '3': 'Nueva solicitud de inicio (TV)'
-    }[opt] || 'Opción';
-    bubbleUser(text);
-
-    // Aquí pones la lógica real con tus sistemas.
-    if (opt === '1') {
-      bubbleBot('Tu código temporal es: <b>123-456</b> (demo).');
-    } else if (opt === '2') {
-      bubbleBot('Se ha registrado tu solicitud de actualización de hogar. Te avisaremos por WhatsApp cuando esté lista.');
-    } else if (opt === '3') {
-      bubbleBot('Hemos iniciado el proceso para tu nueva solicitud de inicio en TV. Te contactaremos por WhatsApp.');
+    function addBot(text, classes=""){
+      const row = document.createElement("div");
+      row.className = "row";
+      const b = document.createElement("div");
+      b.className = "bot " + classes;
+      b.textContent = text;
+      row.appendChild(b);
+      $chat.appendChild(row);
+      $chat.scrollTop = $chat.scrollHeight;
     }
-    afterFlowMessage();
-  }
-
-  function validatePhone(inputDigits) {
-    if (!inputDigits || inputDigits.length < MIN_LOCAL_DIGITS) {
-      bubbleBot(`Por favor escribe al menos <b>${MIN_LOCAL_DIGITS}</b> dígitos de tu número sin espacios.`);
-      return false;
+    function addMe(text){
+      const row = document.createElement("div");
+      row.className = "row";
+      const me = document.createElement("div");
+      me.className = "me pill";
+      me.textContent = text;
+      row.appendChild(me);
+      $chat.appendChild(row);
+      $chat.scrollTop = $chat.scrollHeight;
+    }
+    function addChoices(){
+      const row = document.createElement("div");
+      row.className = "row";
+      const box = document.createElement("div");
+      box.className = "bot choices";
+      box.innerHTML = `
+        <div style="font-weight:700; margin-bottom:6px">Selecciona una opción:</div>
+        <button type="button" class="btn" data-choice="1">1) Código de acceso temporal</button>
+        <button type="button" class="btn" data-choice="2">2) Actualizar tu Hogar</button>
+        <button type="button" class="btn" data-choice="3">3) Nueva solicitud de inicio (TV)</button>
+      `;
+      box.addEventListener("click", (e)=>{
+        const btn = e.target.closest("[data-choice]");
+        if(!btn) return;
+        handleText(btn.dataset.choice);
+      });
+      row.appendChild(box);
+      $chat.appendChild(row);
+      $chat.scrollTop = $chat.scrollHeight;
+    }
+    function endWithHomeHint(){
+      const row = document.createElement("div");
+      row.className = "row";
+      const b = document.createElement("div");
+      b.className = "bot";
+      b.innerHTML = `Escribe <b>"hola"</b> para volver al menú principal.`;
+      row.appendChild(b);
+      $chat.appendChild(row);
+      $chat.scrollTop = $chat.scrollHeight;
+      $input.placeholder = 'Escribe tu número de teléfono (solo dígitos)';
     }
 
-    // Coincidencia por sufijo: si lo que escribe el cliente coincide
-    // con el final de algún teléfono de la lista, lo consideramos válido.
-    const found = customers.find(c => c.phoneDigits.endsWith(inputDigits));
-    if (found) {
-      verified = true;
-      bubbleBot('✅ <span class="ok">Número verificado. ¡Bienvenido!</span>');
-      showMenu();
-      return true;
-    } else {
-      bubbleBot('❌ No encontramos tu número. Por favor, contacta al administrador para registrarte.');
-      return false;
-    }
-  }
-
-  async function loadSheet() {
-    try {
-      const res = await fetch(SHEET_CSV_URL, {cache: 'no-store'});
-      const csv = await res.text();
-
-      // Parseo muy simple de CSV (2 columnas: Nombre, Teléfono)
-      // Si tu hoja puede tener comas en el nombre, sería mejor un parser CSV completo,
-      // pero para esta hoja simple funciona.
-      const rows = csv.split(/\r?\n/).filter(r => r.trim() !== '');
-      const header = rows.shift(); // "Nombre,Teléfono"
-      customers = rows.map(line => {
-        const parts = line.split(',');
-        const name = (parts[0] || '').trim();
-        const phoneDigits = normalizeDigits(parts[1] || '');
-        return { name, phoneDigits };
-      }).filter(r => r.phoneDigits.length > 0);
-    } catch (e) {
-      console.error(e);
-      bubbleBot('⚠️ No pude cargar la lista de clientes. Verifica el enlace CSV publicado.');
-    }
-  }
-
-  function resetToMenu() {
-    verified = true; // ya estaba verificado
-    showMenu();
-  }
-
-  async function start() {
-    await loadSheet();
-    askForPhone();
-    input.focus();
-  }
-
-  async function send() {
-    const raw = input.value.trim();
-    if (!raw) return;
-    input.value = '';
-
-    bubbleUser(raw);
-
-    if (/^hola$/i.test(raw)) {
-      if (verified) {
-        resetToMenu();
-      } else {
-        askForPhone();
+    // --- Carga la base (CSV) ---
+    async function loadDB(){
+      try{
+        const res = await fetch(SHEET_CSV_URL, {cache:"no-store"});
+        const text = await res.text();
+        const rows = text.trim().split(/\r?\n/);
+        // Asumimos cabecera: Nombre,Teléfono
+        State.db = rows.slice(1).map(line=>{
+          const [name, phone] = line.split(/,(.+)/); // solo primera coma
+          const phoneRaw = toDigits(phone||"");
+          const tail9 = lastNDigits(phoneRaw, 9);
+          const tail8 = lastNDigits(phoneRaw, 8);
+          return { name: (name||"").trim(), phoneRaw, phoneTail8: tail8, phoneTail9: tail9 };
+        });
+      }catch(e){
+        addBot("⚠️ No pude cargar la lista de clientes. Revisa el enlace del Google Sheet.");
       }
-      return;
     }
 
-    if (!verified) {
-      const digits = normalizeDigits(raw);
-      validatePhone(digits);
-      return;
+    function matchPhone(userInput){
+      const d = toDigits(userInput);
+      if(!d) return null;
+      const t9 = lastNDigits(d, 9);
+      const t8 = lastNDigits(d, 8);
+      // Coincidimos por los últimos 9 o 8 dígitos
+      return State.db.find(row => row.phoneTail9 === t9 || row.phoneTail8 === t8) || null;
     }
 
-    // Ya verificado => interpretar selección por número
-    const m = raw.match(/^[123]$/);
-    if (m) {
-      handleOption(m[0]);
-    } else {
-      bubbleBot('Por favor elige una opción válida (1, 2 o 3) o escribe "hola" para volver al menú.');
+    // --- Flujo principal ---
+    async function resetToHome(){
+      State.step = "await_phone";
+      State.verifiedPhone = null;
+      State.pendingChoice = null;
+      State.tmpPhoneForFlow = null;
+      $chat.innerHTML = "";
+      addBot("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
+      $input.value = "";
+      $input.placeholder = 'Escribe tu número de teléfono (solo dígitos)';
+      $input.focus();
     }
-  }
 
-  btn.addEventListener('click', send);
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
+    async function handleText(raw){
+      const text = (raw||"").trim();
+
+      // Reinicio rápido
+      if(text.toLowerCase() === "hola"){
+        addMe(text);
+        await sleep(150);
+        return resetToHome();
+      }
+
+      // Máquina de estados
+      if(State.step === "await_phone"){
+        addMe(text);
+        await sleep(120);
+
+        const hit = matchPhone(text);
+        if(!hit){
+          addBot("❌ Ese número no está registrado. Por favor, contacta al administrador.");
+          endWithHomeHint();
+          return;
+        }
+        State.verifiedPhone = hit;
+        const okRow = document.createElement("div");
+        okRow.className = "row";
+        const ok = document.createElement("div");
+        ok.className = "bot ok";
+        ok.textContent = "✔ Número verificado. ¡Bienvenido!";
+        okRow.appendChild(ok);
+        $chat.appendChild(okRow);
+
+        State.step = "menu";
+        addChoices();
+        $input.value = "";
+        $input.placeholder = 'Escribe 1, 2 o 3';
+        return;
+      }
+
+      if(State.step === "menu"){
+        addMe(text);
+        const choice = text.trim();
+        if(!/^[123]$/.test(choice)){
+          addBot("Por favor, responde con 1, 2 o 3.");
+          return;
+        }
+        State.pendingChoice = choice;
+
+        if(choice === "1"){
+          State.step = "flow_1_phone";
+          addBot("Por favor, ingresa tu número sin espacios:");
+          $input.value = "";
+          $input.placeholder = "Ej: 934231163";
+          return;
+        }
+        if(choice === "2"){
+          State.step = "flow_2_phone";
+          addBot("Por favor, ingresa tu número sin espacios:");
+          $input.value = "";
+          $input.placeholder = "Ej: 934231163";
+          return;
+        }
+        if(choice === "3"){
+          // Mensaje informativo
+          addBot("📺 Listo. Generaremos una nueva solicitud de inicio. Te avisaremos por WhatsApp cuando esté activa.");
+          endWithHomeHint();
+          State.step = "done";
+          return;
+        }
+      }
+
+      if(State.step === "flow_1_phone"){
+        addMe(text);
+        State.tmpPhoneForFlow = toDigits(text);
+        State.step = "flow_1_email";
+        addBot("Ahora ingresa tu correo:");
+        $input.value = "";
+        $input.placeholder = "tu@correo.com";
+        return;
+      }
+
+      if(State.step === "flow_1_email"){
+        addMe(text);
+        // Simulamos código de 4 dígitos
+        const code = Math.floor(1000 + Math.random()*9000);
+        addBot(`🔐 Tu código es: ${code}\nTienes 15 minutos para ingresarlo.`);
+        endWithHomeHint();
+        State.step = "done";
+        return;
+      }
+
+      if(State.step === "flow_2_phone"){
+        addMe(text);
+        State.tmpPhoneForFlow = toDigits(text);
+        State.step = "flow_2_email";
+        addBot("Ahora ingresa tu correo:");
+        $input.value = "";
+        $input.placeholder = "tu@correo.com";
+        return;
+      }
+
+      if(State.step === "flow_2_email"){
+        addMe(text);
+        // Enlace largo de ejemplo (simula el de Netflix)
+        const url = "https://www.netflix.com/account/update-primary-location?nfToken=EjemploTokenLargo123";
+        addBot(`🔗 Tu enlace es: ${url}\nTienes 15 minutos para ingresarlo.`);
+        endWithHomeHint();
+        State.step = "done";
+        return;
+      }
+
+      // Si ya finalizó un flujo
+      if(State.step === "done"){
+        addBot('Escribe "hola" para volver al menú principal.');
+      }
+    }
+
+    // --- Eventos de envío (botón + ENTER) ---
+    $form.addEventListener("submit", (e)=>{
       e.preventDefault();
-      send();
-    }
-  });
+      const v = $input.value.trim();
+      if(!v) return;
+      handleText(v);
+      $input.value = "";
+    });
+    // Enter funciona por defecto vía submit del form,
+    // pero aseguramos en móviles con teclados “done”
+    $input.addEventListener("keydown",(e)=>{
+      if(e.key === "Enter"){
+        // El submit del form lo gestionará
+      }
+    });
 
-  start();
+    // Inicializa
+    (async ()=>{
+      await loadDB();
+      // listo para usar
+    })();
   </script>
 </body>
 </html>
