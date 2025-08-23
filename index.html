@@ -9,17 +9,16 @@
   <title>Fox Stream Bot</title>
   <style>
     :root{
-      --bg:#eef2f7; --card:#fff; --primary:#2563eb; --primary-weak:#e8f0ff;
-      --ok:#16a34a; --warn:#b91c1c; --muted:#6b7280; --bubble:#e9f2ff;
+      --bg:#eef2f7; --card:#fff; --primary:#2563eb;
+      --ok:#16a34a; --muted:#6b7280; --bubble:#e9f2ff;
       --shadow:0 10px 30px rgba(0,0,0,.08);
     }
-    html,body{height:100%}
-    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
+    body{margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Roboto,Arial;color:#0f172a}
     .wrap{max-width:980px;margin:auto;padding:24px}
-    h1{margin:0;text-align:center;font-size:clamp(22px,3vw,34px)}
-    .sub{color:var(--muted);text-align:center;margin:2px 0 14px}
-    .ver{color:#94a3b8;text-align:center;margin:-6px 0 16px;font-size:12px}
-    .card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:20px 20px 16px;min-height:60vh}
+    h1{text-align:center;margin:0}
+    .sub,.ver{color:var(--muted);text-align:center}
+    .ver{font-size:12px;margin:2px 0 14px}
+    .card{background:#fff;border-radius:24px;box-shadow:var(--shadow);padding:20px 20px 16px;min-height:60vh}
     .chat{border:1px solid #e6ecf5;border-radius:20px;padding:14px;min-height:48vh;background:#fff;overflow:auto}
     .row{display:flex;gap:10px;margin:10px 0}
     .bot{max-width:78%}
@@ -27,23 +26,19 @@
     .bubble{background:var(--bubble);padding:10px 12px;border-radius:14px;line-height:1.45}
     .me .bubble{background:#eef2f7}
     .pill{display:inline-block;background:#eef5ff;padding:6px 10px;border-radius:999px}
-    .ok{background:#e9f9ee;color:#0f7a33}
-    .err{background:#fdecec;color:#b42318}
     .actions{background:#f4f8ff;border:1px dashed #cfe0ff;padding:14px;border-radius:14px}
-    .btn{display:inline-block;border:1px solid #cfe0ff;background:#fff;padding:10px 12px;border-radius:14px;cursor:pointer;user-select:none;transition:.15s;margin:6px 8px 0 0}
-    .btn:hover{background:#f7fbff}
+    .btn{display:inline-block;border:1px solid #cfe0ff;background:#fff;padding:10px 12px;border-radius:14px;cursor:pointer;user-select:none;margin:6px 8px 0 0}
     .bar{display:flex;gap:10px;margin-top:12px}
     .input{flex:1;border:1px solid #d9e2ef;padding:12px 14px;border-radius:14px;outline:none;font-size:16px;background:#fff}
     .send{border:none;background:var(--primary);color:#fff;padding:12px 18px;border-radius:14px;cursor:pointer;font-weight:600}
     .tip{color:var(--muted);font-size:12px}
-    @media (max-width:640px){.bot,.me{max-width:90%}.chat{min-height:52vh}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Fox Stream Bot</h1>
     <div class="sub">Soporte automático 24/7</div>
-    <div class="ver">v0.7</div>
+    <div class="ver" id="versions">frontend v0.8 · backend…</div>
 
     <div class="card">
       <div id="chat" class="chat"></div>
@@ -58,22 +53,23 @@
 
   <script>
     // ======= CONFIG =======
+    const FRONT_VER = "0.8";
     const SHEET_CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
-    const API_URL =
+    const API_BASE =
       "https://script.google.com/macros/s/AKfycbzPn0AeY6bKK5onUhfXeiWbSK_Pu3kNK-JI1qozE_OdxP4hAvo2_Jvmbv_lmRTvaarE/exec";
 
     // ======= Estado =======
     const chat = document.getElementById("chat");
     const input = document.getElementById("msg");
     const btn = document.getElementById("send");
+    const versions = document.getElementById("versions");
 
     let state = "awaitPhone";     // awaitPhone -> menu -> awaitEmail
-    let phoneOK = false;
     let selectedType = null;      // 1,2,3
-    let customers = [];           // {name, phoneDigits}
+    let customers = [];
 
-    // ======= UI helpers =======
+    // ======= UI =======
     const escapeHTML = s => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     const addBot = (html, cls="") => { const r=document.createElement("div"); r.className="row bot"; r.innerHTML=`<div class="bubble ${cls}">${html}</div>`; chat.appendChild(r); chat.scrollTop=chat.scrollHeight; };
     const addUser = (text) => { const r=document.createElement("div"); r.className="row me"; r.innerHTML=`<div class="bubble">${escapeHTML(text)}</div>`; chat.appendChild(r); chat.scrollTop=chat.scrollHeight; };
@@ -94,7 +90,7 @@
       box.querySelectorAll(".btn").forEach(b => b.addEventListener("click", () => handleUserInput(b.dataset.type)));
     }
 
-    // ======= Clientes desde CSV =======
+    // ======= Clientes CSV =======
     async function loadCustomers(){
       const res = await fetch(SHEET_CSV_URL, {cache:"no-store"});
       const csv = await res.text();
@@ -108,8 +104,7 @@
       customers = out;
     }
     function existsPhone(userDigits){
-      const d = (userDigits||"").replace(/\D/g,"");
-      const last9 = d.slice(-9);
+      const last9 = userDigits.replace(/\D/g,"").slice(-9);
       return customers.some(c => c.phoneDigits.endsWith(last9));
     }
 
@@ -122,7 +117,7 @@
     }
     function toMenu(){
       state = "menu";
-      addBot(`<span class="ok pill">Número verificado. ¡Bienvenido!</span>`);
+      addBot(`<span class="pill" style="background:#e9f9ee;color:#0f7a33">Número verificado. ¡Bienvenido!</span>`);
       addActions();
       input.value = "";
       input.placeholder = 'Escribe "hola" para reiniciar o elige una opción';
@@ -138,13 +133,13 @@
     async function consultInbox(type, email){
       addBot(`⌛ Consultando tu correo…`, "pill");
       try{
-        const url = `${API_URL}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}&v=0.7`;
+        const url = `${API_BASE}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}&v=${encodeURIComponent(FRONT_VER)}`;
         const res = await fetch(url, { method:"GET", cache:"no-store" });
         const data = await res.json();
 
         if(!data.ok){
           const msg = data.message || "No se encontró ningún correo enviado. Verifique que haya enviado el código o el enlace. Vuelva a intentarlo una vez lo haya hecho.";
-          addBot(`Error: ${escapeHTML(msg)}`, "err");
+          addBot(`Error: ${escapeHTML(msg)}`, "pill");
           addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
           resetToStart(); return;
         }
@@ -155,12 +150,12 @@
           const link = escapeHTML(data.link);
           addBot(`<b>Tu enlace es:</b> <a href="${link}" target="_blank">${link}</a><br/>Tienes 15 minutos para ingresarlo.`);
         } else {
-          addBot(`No se encontraron datos válidos en el correo.`, "err");
+          addBot(`No se encontraron datos válidos en el correo.`, "pill");
         }
         addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
         resetToStart();
       }catch(err){
-        addBot(`Error: ${escapeHTML(err.message||String(err))}`, "err");
+        addBot(`Error: ${escapeHTML(err.message||String(err))}`, "pill");
         addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
         resetToStart();
       }
@@ -170,9 +165,8 @@
       const text = (raw ?? input.value).trim();
       if (!text) return;
       addUser(text);
-      input.value = ""; // SIEMPRE limpiamos
+      input.value = "";
 
-      // "hola" REINICIA SIEMPRE, SIN IMPORTAR EL ESTADO
       if (text.toLowerCase() === "hola"){
         resetToStart();
         addBot(`👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.`);
@@ -181,33 +175,25 @@
 
       if (state === "awaitPhone"){
         const digits = text.replace(/\D/g,"");
-        if(!/^\d{6,15}$/.test(digits)){
-          addBot(`Formato inválido. Por favor, escribe solo dígitos.`, "err");
-          return;
-        }
+        if(!/^\d{6,15}$/.test(digits)){ addBot(`Formato inválido. Escribe solo dígitos.`); return; }
         if(!existsPhone(digits)){
-          addBot(`❌ Tu número no está registrado. Por favor, contáctate con el administrador.`, "err");
+          addBot(`❌ Tu número no está registrado. Por favor, contáctate con el administrador.`);
           addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
           return;
         }
-        phoneOK = true; toMenu(); return;
+        toMenu(); return;
       }
 
       if (state === "menu"){
         const pick = text.replace(/[^\d]/g,"");
         if (["1","2","3"].includes(pick)) { askEmailFor(pick); return; }
-        addBot(`Respuesta inválida. Elige 1, 2 o 3.`, "err");
-        return;
+        addBot(`Respuesta inválida. Elige 1, 2 o 3.`); return;
       }
 
       if (state === "awaitEmail"){
         const email = text.toLowerCase();
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-          addBot(`Correo inválido. Intenta nuevamente.`, "err");
-          return;
-        }
-        await consultInbox(selectedType, email);
-        return;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ addBot(`Correo inválido.`); return; }
+        await consultInbox(selectedType, email); return;
       }
     }
 
@@ -215,6 +201,13 @@
     input.addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); handleUserInput(); } });
 
     (async ()=>{
+      // Mostrar versión de backend
+      try{
+        const r = await fetch(`${API_BASE}?ping=1&x=${Date.now()}`, {cache:"no-store"});
+        const d = await r.json();
+        versions.textContent = `frontend v${FRONT_VER} · backend ${d.ok ? "v"+d.version : "(sin respuesta)"}`;
+      }catch{ versions.textContent = `frontend v${FRONT_VER} · backend (sin respuesta)`; }
+
       await loadCustomers();
       addBot(`👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.`);
     })();
