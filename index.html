@@ -1,246 +1,228 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fox Stream Bot</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#f4f7fb; --card:#ffffff; --ink:#0f172a;
-      --muted:#64748b; --primary:#1d4ed8; --primary-ink:#fff;
-      --chip:#e9f0ff; --chip-ink:#0f172a; --ok:#16a34a; --error:#dc2626;
-      --bubble:#eaf1ff;
-    }
-    *{box-sizing:border-box}
-    html,body{margin:0;height:100%}
-    body{font-family:Inter,system-ui,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-    .wrap{max-width:980px;margin:24px auto;padding:12px}
-    .card{background:var(--card);border-radius:16px;box-shadow:0 6px 24px rgba(2,6,23,.06);padding:18px}
-    h1{margin:0 0 2px;font-size:clamp(26px,3.4vw,40px);text-align:center}
-    .sub{margin:0 0 18px;text-align:center;color:var(--muted)}
-    .chat{border:1px solid #e6e9f2;border-radius:14px;padding:14px;height:min(70vh,560px);overflow:auto;background:#fff}
-    .row{display:flex;gap:10px;margin:10px 0;align-items:flex-start}
-    .row .me{margin-left:auto}
-    .bubble{background:var(--bubble);border-radius:12px;padding:10px 12px;display:inline-flex;align-items:center;gap:8px}
-    .chip{background:#eef2ff;color:#334155;border-radius:999px;padding:6px 10px;font-weight:600}
-    .ok{background:#ecfdf5;color:#065f46}
-    .error{background:#fee2e2;color:#991b1b}
-    .panel{background:#eff6ff;border:1px dashed #c7d7fe;border-radius:12px;padding:12px}
-    .options{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
-    .btn{background:#eef2ff;border:1px solid #c7d7fe;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}
-    .btn:hover{filter:brightness(0.97)}
-    .inputbar{display:flex;gap:10px;margin-top:12px}
-    input[type="text"]{flex:1;padding:14px 12px;border-radius:10px;border:1px solid #d6d9e4}
-    button.enviar{background:var(--primary);color:var(--primary-ink);border:none;border-radius:10px;padding:0 18px;font-weight:700}
-    .hint{color:#8a94a7;font-size:12px;margin-top:6px}
-    .tag{background:#eef2ff;border-radius:999px;padding:4px 8px;font-size:12px}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fox Stream Bot</title>
+<style>
+  :root{
+    --bg:#f3f5f8;
+    --card:#fff;
+    --ink:#17212f;
+    --muted:#6b7280;
+    --brand:#2563eb;
+    --bubble:#e8f0ff;
+    --ok:#10b981;
+    --err:#ef4444;
+    --soft:#eff4ff;
+    --chip:#e9eef9;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji",sans-serif}
+  .wrap{max-width:980px;margin:24px auto;padding:8px}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.04);padding:22px}
+  h1{margin:0 0 6px 0;font-size:36px;font-weight:800;text-align:center}
+  .sub{margin:0 0 14px 0;text-align:center;color:var(--muted)}
+  .chat{border:1px solid #e6eaf3;border-radius:12px;padding:16px;min-height:380px;max-height:60vh;overflow:auto;background:#fff}
+  .row{display:flex;margin:8px 0}
+  .bot,.me{max-width:85%;padding:10px 12px;border-radius:12px;line-height:1.35;font-size:15px}
+  .bot{background:#eaf1ff}
+  .me{background:#f5f7fb;margin-left:auto}
+  .status-ok{display:inline-block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.35);color:#065f46;padding:8px 12px;border-radius:10px}
+  .status-err{display:inline-block;background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.35);color:#7f1d1d;padding:8px 12px;border-radius:10px}
+  .panel{background:var(--soft);border:1px dashed #c7d3ff;padding:14px;border-radius:12px;margin:8px 0}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+  .chip{background:var(--chip);border-radius:10px;padding:10px 12px;cursor:pointer;border:1px solid #d6def0;user-select:none}
+  .chip:hover{filter:brightness(.97)}
+  .inputbar{display:flex;gap:10px;margin-top:10px}
+  input[type=text]{flex:1;padding:14px;border-radius:10px;border:1px solid #d6deee;font-size:15px}
+  button{background:var(--brand);color:#fff;border:none;border-radius:10px;padding:12px 18px;font-size:15px;cursor:pointer}
+  .hint{color:var(--muted);font-size:12px;margin-top:6px}
+  a.link{color:#0b57d0;word-break:break-all}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Fox Stream Bot</h1>
-    <p class="sub">Soporte automático 24/7</p>
+<div class="wrap">
+  <h1>Fox Stream Bot</h1>
+  <div class="sub">Soporte automático 24/7</div>
 
-    <div class="card">
-      <div id="chat" class="chat">
-        <div class="row">
-          <div class="bubble">👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.</div>
-        </div>
-      </div>
+  <div class="card">
+    <div id="chat" class="chat"></div>
 
-      <div class="inputbar">
-        <input id="msg" type="text" placeholder='Escribe tu número de teléfono (solo dígitos)'>
-        <button id="send" class="enviar">Enviar</button>
-      </div>
-      <div class="hint">Tip: presiona Enter para enviar.</div>
+    <div class="inputbar">
+      <input id="msg" type="text" placeholder='Escribe tu número de teléfono (solo dígitos)' />
+      <button id="send">Enviar</button>
     </div>
+    <div class="hint">Tip: presiona Enter para enviar.</div>
   </div>
+</div>
 
-  <script>
-  // ====== CONFIGURA TUS URLS ======
-  // CSV publicado (Google Sheets → Archivo > Compartir > Publicar en la web → CSV de la Hoja 1)
-  const SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
+<script>
+/* ==== CONFIG ==== */
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
+const API_URL = "https://script.google.com/macros/s/AKfycbzPn0AeY6bKK5onUhfXeiWbSK_Pu3kNK-JI1qozE_OdxP4hAvo2_Jvmbv_lmRTvaarE/exec";
 
-  // Apps Script WebApp (el URL que te dio “Implementar” → App web → URL)
-  const GMAIL_API_URL =
-    "https://script.google.com/macros/s/AKfycbzPn0AeY6bKK5onUhfXeiWbSK_Pu3kNK-JI1qozE_OdxP4hAvo2_Jvmbv_lmRTvaarE/exec";
+/* ==== Estado ==== */
+const chat = document.getElementById("chat");
+const input = document.getElementById("msg");
+const sendBtn = document.getElementById("send");
 
-  // ====== Estado del bot ======
-  const chat = document.getElementById('chat');
-  const input = document.getElementById('msg');
-  const sendBtn = document.getElementById('send');
+let phones = [];              // lista de teléfonos de la hoja
+let stage = "ask_phone";      // ask_phone -> menu -> wait_email(type) -> done
+let validatedPhone = null;
 
-  let allowedNumbers = [];      // números tal como vienen del CSV (solo dígitos)
-  let verified = false;         // ya pasó validación de teléfono
-  let awaiting = null;          // 'option','number','email'
-  let selectedOption = null;    // 1 | 2 | 3
-  let tempNumberDigits = "";    // número digitado por el usuario (solo dígitos)
+/* ==== Utilidades ==== */
+const toDigits = s => String(s||"").replace(/\D+/g,"");
+function endsMatch(inputDigits, phoneDigits){
+  // coincide si el número de la hoja termina en los dígitos ingresados por el cliente
+  return phoneDigits.endsWith(inputDigits);
+}
+function scrollDown(){ chat.scrollTop = chat.scrollHeight; }
+function addBot(html){ const r = document.createElement("div"); r.className="row"; r.innerHTML=`<div class="bot">${html}</div>`; chat.appendChild(r); scrollDown(); }
+function addMe(text){ const r = document.createElement("div"); r.className="row"; r.innerHTML=`<div class="me">${text}</div>`; chat.appendChild(r); scrollDown(); }
+function addPanel(html){ const r = document.createElement("div"); r.className="panel"; r.innerHTML=html; chat.appendChild(r); scrollDown(); }
+function resetToHello(){
+  stage = "ask_phone";
+  validatedPhone = null;
+  input.value = "";
+  chat.innerHTML = "";
+  addBot("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
+}
 
-  function scrollToBottom(){ chat.scrollTop = chat.scrollHeight; }
-  function addBubble(text, mine=false, cls=""){
-    const row = document.createElement('div'); row.className='row';
-    const b = document.createElement('div'); b.className='bubble '+cls; b.textContent=text;
-    if(mine){ row.classList.add('me'); }
-    row.appendChild(b); chat.appendChild(row); scrollToBottom();
+async function loadPhones(){
+  const res = await fetch(SHEET_CSV_URL);
+  const text = await res.text();
+  // Muy simple: columna B es “Teléfono”
+  phones = [];
+  text.split(/\r?\n/).forEach((row,i)=>{
+    const cols = row.split(",");
+    if (i===0) return; // header
+    const tel = toDigits(cols[1]||"");
+    if (tel) phones.push(tel);
+  });
+}
+
+function showMenu(){
+  const ui = `
+    <div><strong>Selecciona una opción:</strong></div>
+    <div class="chips">
+      <div class="chip" data-opt="1">1) Código de acceso temporal</div>
+      <div class="chip" data-opt="2">2) Actualizar tu Hogar</div>
+      <div class="chip" data-opt="3">3) Nueva solicitud de inicio (TV)</div>
+    </div>
+  `;
+  addPanel(ui);
+  document.querySelectorAll(".chip").forEach(el=>{
+    el.addEventListener("click",()=> handleOption(el.getAttribute("data-opt")));
+  });
+}
+
+function askEmailFor(type){
+  stage = "wait_email_" + type;
+  addBot("Por favor, ingresa tu correo sin espacios:");
+}
+
+async function queryApi(type, email){
+  const url = `${API_URL}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}`;
+  const res = await fetch(url, { method:"GET" });
+  return await res.json();
+}
+
+function showBackToMenu(){
+  addPanel('Escribe <strong>"hola"</strong> para volver al menú principal.');
+}
+
+/* ==== Flujo ==== */
+resetToHello();
+loadPhones().catch(()=>{ /* si falla la hoja, igual dejamos seguir */ });
+
+async function handleUserSend(){
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMe(text);
+
+  // Reinicio rápido
+  if (text.toLowerCase() === "hola"){
+    resetToHello();
+    return;
   }
-  function addPanelOptions(){
-    const wrap = document.createElement('div'); wrap.className='row';
-    const panel = document.createElement('div'); panel.className='panel';
-    panel.innerHTML = `<div><strong>Selecciona una opción:</strong></div>`;
-    const box = document.createElement('div'); box.className='options';
-    [
-      ["1) Código de acceso temporal",1],
-      ["2) Actualizar tu Hogar",2],
-      ["3) Nueva solicitud de inicio (TV)",3],
-    ].forEach(([label,val])=>{
-      const btn=document.createElement('button'); btn.className='btn'; btn.textContent=label;
-      btn.onclick=()=>{ processMessage(String(val)); };
-      box.appendChild(btn);
-    });
-    panel.appendChild(box); wrap.appendChild(panel); chat.appendChild(wrap); scrollToBottom();
-  }
-  function addOk(text){ const r=document.createElement('div'); r.className='row'; const b=document.createElement('div'); b.className='bubble ok'; b.textContent=text; r.appendChild(b); chat.appendChild(r); scrollToBottom(); }
-  function addErr(text){ const r=document.createElement('div'); r.className='row'; const b=document.createElement('div'); b.className='bubble error'; b.textContent=text; r.appendChild(b); chat.appendChild(r); scrollToBottom(); }
-  function addTag(text){
-    const row=document.createElement('div'); row.className='row me';
-    const t=document.createElement('span'); t.className='tag'; t.textContent=text;
-    row.appendChild(t); chat.appendChild(row); scrollToBottom();
-  }
 
-  // Normaliza: deja solo dígitos
-  const onlyDigits = s => (s||"").replace(/\D+/g,"");
+  // Etapas
+  if (stage === "ask_phone"){
+    const only = toDigits(text);
+    if (!only){ addBot(`<span class="status-err">Ingresa solo dígitos.</span>`); return; }
 
-  // Carga CSV sin caché y construye lista de números de la columna "Teléfono"
-  async function loadCSV(){
-    const url = SHEET_CSV_URL + "&_=" + Date.now(); // no-cache
-    const t = await fetch(url, {cache:"no-store"}).then(r=>r.text());
-    const lines = t.split(/\r?\n/).filter(x=>x.trim()!=="");
-    // detecta índice de la columna Teléfono por encabezado
-    const header = lines[0].split(',');
-    let phoneIdx = header.findIndex(h => /tel(e|é)fono/i.test(h));
-    if (phoneIdx < 0) phoneIdx = 1; // fallback columna B
-    allowedNumbers = lines.slice(1).map(row=>{
-      const cols = row.split(',');
-      return onlyDigits(cols[phoneIdx] || "");
-    }).filter(Boolean);
-  }
-
-  // La validación ahora acepta que el usuario escriba SOLO los dígitos finales.
-  // Retorna true si algún número registrado TERMINA con lo que escribió el usuario.
-  function isAuthorized(userDigits){
-    const q = onlyDigits(userDigits);
-    if (!q) return false;
-    // Requerimos al menos 6 dígitos para reducir falsas coincidencias
-    if (q.length < 6) return false;
-    return allowedNumbers.some(reg => reg.endsWith(q));
-  }
-
-  function resetToStart(){
-    verified = false; awaiting = null; selectedOption = null; tempNumberDigits="";
-    addBubble('👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.');
-  }
-
-  async function queryGmailAPI(type, email){
-    // Llama a tu Apps Script
-    const url = `${GMAIL_API_URL}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}&_=${Date.now()}`;
-    const res = await fetch(url, {mode:"cors", cache:"no-store"});
-    return res.json();
-  }
-
-  async function processMessage(textRaw){
-    let text = String(textRaw||"").trim();
-    if (!text) return;
-
-    // Mostrar lo que escribió el usuario como etiqueta
-    addTag(text);
-
-    // Comando 'hola' para reiniciar
-    if (/^hola$/i.test(text)){
-      addBubble('Escribe "hola" para volver al menú principal.'); // recordatorio anterior
-      resetToStart();
+    // validamos contra la hoja: coincide si cualquier teléfono termina con esos dígitos
+    const ok = phones.some(ph => endsMatch(only, ph));
+    if (!ok){
+      addBot(`<span class="status-err">Tu número no está registrado. Por favor, contáctate con el administrador.</span>`);
+      showBackToMenu();
       return;
     }
 
-    // Si aún no está validado, esperamos un número
-    if (!verified){
-      const digits = onlyDigits(text);
-      tempNumberDigits = digits;
-      if (!isAuthorized(digits)){
-        addErr('Tu número no está registrado. Por favor, contáctate con el administrador.');
-        addBubble('Escribe "hola" para volver al menú principal.');
-        return;
-      }
-      verified = true;
-      addOk('Número verificado. ¡Bienvenido!');
-      awaiting = 'option';
-      addPanelOptions();
+    validatedPhone = only;
+    addBot(`<span class="status-ok">Número verificado. ¡Bienvenido!</span>`);
+    stage = "menu";
+    showMenu();
+    input.placeholder = 'Escribe "hola" para reiniciar';
+    return;
+  }
+
+  // Botones por número (si el usuario teclea el número directamente)
+  if (stage === "menu"){
+    const opt = text.replace(/\D+/g,"");
+    if (["1","2","3"].includes(opt)){
+      handleOption(opt);
+    }else{
+      addBot('Escribe 1, 2 o 3 para elegir una opción.');
+    }
+    return;
+  }
+
+  // Esperando correo:
+  if (stage.startsWith("wait_email_")){
+    const type = stage.split("_").pop();
+    const email = text.trim().toLowerCase();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+      addBot(`<span class="status-err">Correo inválido. Intenta de nuevo.</span>`);
       return;
     }
 
-    // Elegir opción
-    if (awaiting === 'option'){
-      const opt = Number(onlyDigits(text));
-      if (![1,2,3].includes(opt)){
-        addErr('Opción inválida. Responde 1, 2 o 3.');
-        return;
-      }
-      selectedOption = opt;
-      awaiting = 'email';
-      addBubble('Por favor, ingresa tu correo sin espacios:');
-      return;
-    }
-
-    // Capturar correo y consultar Gmail
-    if (awaiting === 'email'){
-      const email = text.toLowerCase();
-      const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if (!okEmail){
-        addErr('Correo inválido. Intenta de nuevo.');
-        return;
-      }
-      addBubble('⏳ Consultando tu correo…');
-
-      try{
-        const r = await queryGmailAPI(selectedOption, email);
-        // r: { ok, message, code?, link?, receivedAt? }
-        if (!r.ok){
-          addErr(r.message || 'No encontramos información para ese correo.');
+    addBot("⏳ Consultando tu correo…");
+    try{
+      const data = await queryApi(type, email);
+      if (data.ok){
+        if (type==="1"){
+          addBot(`Tu código es: <strong>${data.code}</strong><br/>Tienes 15 minutos para ingresarlo.`);
+        }else if (type==="2"){
+          addBot(`Tu enlace es: <a class="link" href="${data.link}" target="_blank" rel="noopener">${data.link}</a><br/>Tienes 15 minutos para ingresarlo.`);
         }else{
-          if (selectedOption === 1){
-            addOk(`Tu código es: ${r.code || '----'}`);
-            addBubble('Tienes 15 minutos para ingresarlo.');
-          }else if (selectedOption === 2){
-            addOk(`Tu enlace es: ${r.link || '(no disponible)'}`);
-            addBubble('Tienes 15 minutos para ingresarlo.');
-          }else{
-            addOk(`Tu enlace es: ${r.link || '(no disponible)'}`);
-            addBubble('Tienes 15 minutos para ingresarlo.');
-          }
+          addBot(`Tu enlace es: <a class="link" href="${data.link}" target="_blank" rel="noopener">${data.link}</a><br/>Tienes 15 minutos para ingresarlo.`);
         }
-      }catch(e){
-        addErr('Error consultando el correo. Verifica el URL de Apps Script.');
+      }else{
+        // Mensaje claro cuando NO hay correo aún
+        addBot(`<span class="status-err">${data.message || "No fue posible obtener información."}</span>`);
       }
-
-      addBubble('Escribe "hola" para volver al menú principal.');
-      awaiting = null; selectedOption = null;
-      return;
+    }catch(e){
+      addBot(`<span class="status-err">No se pudo consultar el servicio. Inténtalo nuevamente.</span>`);
     }
+    showBackToMenu();
+    stage = "done";
+    return;
   }
 
-  // Listeners
-  sendBtn.addEventListener('click', ()=>processMessage(input.value).then(()=>{input.value=""; input.focus();}));
-  input.addEventListener('keydown', (e)=>{ if(e.key==="Enter"){ e.preventDefault(); sendBtn.click(); }});
+  if (stage === "done"){
+    addBot('Escribe <strong>"hola"</strong> para volver al menú principal.');
+  }
+}
 
-  // Init
-  (async ()=>{
-    await loadCSV();
-    // foco en el input
-    input.focus();
-  })();
-  </script>
+function handleOption(opt){
+  addMe(opt);
+  askEmailFor(opt);
+}
+
+sendBtn.addEventListener("click", handleUserSend);
+input.addEventListener("keydown", (e)=>{ if (e.key==="Enter") handleUserSend(); });
+</script>
 </body>
 </html>
