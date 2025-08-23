@@ -44,31 +44,32 @@
   <div class="card">
     <div id="chat" class="chat"></div>
 
-    <div class="inputbar">
-      <input id="text" type="text" placeholder='Escribe tu número de teléfono (solo dígitos)' />
-      <button id="send">Enviar</button>
-    </div>
+    <form id="form" class="inputbar" autocomplete="off">
+      <input id="text" type="text" placeholder='Escribe tu número de teléfono (solo dígitos)' autocomplete="off" />
+      <button id="send" type="submit">Enviar</button>
+    </form>
     <div class="tip">Tip: presiona Enter para enviar.</div>
   </div>
 </div>
 
 <script>
-/* -------------- CONFIGURACIÓN: pon tus enlaces aquí ------------------- */
+/* ---------------- CONFIG: pon tus enlaces aquí ----------------- */
 const API_URL = "https://script.google.com/macros/s/AKfycbzPn0AeY6bKK5onUhfXeiWbSK_Pu3kNK-JI1qozE_OdxP4hAvo2_Jvmbv_lmRTvaarE/exec";
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
-/* ---------------------------------------------------------------------- */
+/* --------------------------------------------------------------- */
 
 const chat = document.getElementById('chat');
 const input = document.getElementById('text');
+const form  = document.getElementById('form');
 const sendBtn = document.getElementById('send');
 
 let state = "await_phone"; // await_phone -> await_option -> await_email
 let selectedType = null;
-let cachedPhones = null; // teléfonos de la hoja
+let cachedPhones = null;
 
 // UI helpers
 function scrollDown(){ chat.scrollTop = chat.scrollHeight; }
-function bubble(text, who="bot", cls=""){ 
+function bubble(text, who="bot", cls=""){
   const row = document.createElement('div'); row.className = "row";
   const b = document.createElement('div'); b.className = `msg ${who==="bot"?"bot":"user"} ${cls}`;
   b.innerText = text; row.appendChild(b); chat.appendChild(row); scrollDown();
@@ -76,32 +77,26 @@ function bubble(text, who="bot", cls=""){
 function optionsUI(){
   const row = document.createElement('div'); row.className = 'row';
   const box = document.createElement('div'); box.className = 'msg bot options'; row.appendChild(box);
-
-  const title = document.createElement('div'); title.style.marginBottom = "6px";
-  title.style.fontWeight = "700"; title.innerText = "Selecciona una opción:"; box.appendChild(title);
-
-  const opt1 = chip("1) Código de acceso temporal", ()=>pick(1));
-  const opt2 = chip("2) Actualizar tu Hogar", ()=>pick(2));
-  const opt3 = chip("3) Nueva solicitud de inicio (TV)", ()=>pick(3));
-  box.append(opt1,opt2,opt3); chat.appendChild(row); scrollDown();
+  const title = document.createElement('div'); title.style.marginBottom = "6px"; title.style.fontWeight = "700";
+  title.innerText = "Selecciona una opción:"; box.appendChild(title);
+  box.append(chip("1) Código de acceso temporal", ()=>pick(1)),
+             chip("2) Actualizar tu Hogar", ()=>pick(2)),
+             chip("3) Nueva solicitud de inicio (TV)", ()=>pick(3)));
+  chat.appendChild(row); scrollDown();
 }
-function chip(label,onclick){
-  const c = document.createElement('span'); c.className='pill'; c.innerText=label; c.onclick=onclick; return c;
-}
+function chip(label,onclick){ const c=document.createElement('span'); c.className='pill'; c.innerText=label; c.onclick=onclick; return c; }
 
-// Normaliza números a dígitos
+// Utils
 const onlyDigits = s => (s||"").replace(/\D+/g,"");
 function endsWithAnyCountry(phoneSheet, userLocal){
-  // Hace match si el número de la hoja TERMINA con los dígitos ingresados.
   const a = onlyDigits(phoneSheet);
   const b = onlyDigits(userLocal);
   return a.endsWith(b);
 }
 
-// Carga teléfonos de la hoja (CSV)
 async function loadPhones(){
   if (cachedPhones) return cachedPhones;
-  const res = await fetch(SHEET_CSV_URL);
+  const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
   const csv = await res.text();
   const lines = csv.split(/\r?\n/).filter(Boolean);
   const phones = [];
@@ -114,7 +109,7 @@ async function loadPhones(){
   return phones;
 }
 
-// Flujo
+// Flow
 function reset(){
   state = "await_phone"; selectedType = null;
   chat.innerHTML = "";
@@ -128,28 +123,27 @@ async function onSend(){
   const text = input.value.trim();
   if (!text) return;
 
-  // permitir "hola" para reiniciar
-  if (text.toLowerCase() === "hola"){ bubble(text, "user"); reset(); return; }
+  // reinicio
+  if (text.toLowerCase() === "hola"){ bubble(text, "user"); input.value=""; reset(); return; }
 
   if (state === "await_phone"){
-    bubble(text, "user");
+    bubble(text, "user"); input.value="";
     const ok = await verifyPhone(text);
     if (!ok){
       bubble("❌ Tu número no está registrado. Por favor, contáctate con el administrador.","bot","bad");
-      bubble('Escribe "hola" para volver al menú principal.'); 
+      bubble('Escribe "hola" para volver al menú principal.');
       input.placeholder = 'Escribe "hola" para reiniciar';
-      input.value = "";
       return;
     }
     bubble("Número verificado. ¡Bienvenido!","bot","ok");
     optionsUI();
     state = "await_option";
-    input.value = ""; input.placeholder = 'Escribe 1, 2 o 3';
+    input.placeholder = 'Escribe 1, 2 o 3';
     return;
   }
 
   if (state === "await_option"){
-    bubble(text, "user");
+    bubble(text, "user"); input.value="";
     const n = Number(text);
     if (![1,2,3].includes(n)){ bubble("Por favor, elige 1, 2 o 3."); return; }
     pick(n);
@@ -158,8 +152,7 @@ async function onSend(){
 
   if (state === "await_email"){
     const email = text.toLowerCase();
-    bubble(email, "user");
-    input.value = "";
+    bubble(email, "user"); input.value="";
     await resolveWithEmail(email);
     return;
   }
@@ -167,9 +160,9 @@ async function onSend(){
 
 function pick(n){
   selectedType = n;
-  const badge = document.createElement('div'); badge.className="row";
+  const row = document.createElement('div'); row.className="row";
   const b = document.createElement('div'); b.className="msg user"; b.innerText=String(n);
-  badge.appendChild(b); chat.appendChild(badge); scrollDown();
+  row.appendChild(b); chat.appendChild(row); scrollDown();
 
   bubble("Por favor, ingresa tu correo sin espacios:");
   input.placeholder = 'tu@correo.com';
@@ -191,13 +184,11 @@ async function verifyPhone(userNumber){
 async function resolveWithEmail(email){
   bubble("⏳ Consultando tu correo...", "bot");
   try{
-    const url = `${API_URL}?type=${encodeURIComponent(selectedType)}&email=${encodeURIComponent(email)}`;
-    const res = await fetch(url, { method: "GET" });
-    // En fetch del navegador NO existe getResponseHeaders(); solo parseamos JSON
-    const data = await res.json();
+    const url = `${API_URL}?type=${encodeURIComponent(selectedType)}&email=${encodeURIComponent(email)}&v=${Date.now()}`;
+    const res = await fetch(url, { method: "GET", cache: "no-store" });
+    const data = await res.json();  // <- NUNCA usamos getResponseHeaders en el navegador
 
     if (!data.ok){
-      // mensaje claro cuando no hay correo encontrado
       const msg = data.message || "No se encontró ningún correo enviado. Verifique que haya enviado el código o el enlace. Vuelva a intentarlo una vez lo haya hecho.";
       bubble(`Error: ${msg}`, "bot", "bad");
       bubble('Escribe "hola" para volver al menú principal.');
@@ -227,11 +218,8 @@ async function resolveWithEmail(email){
   }
 }
 
-// Listeners
-sendBtn.addEventListener('click', onSend);
-input.addEventListener('keydown', e => { if (e.key === "Enter") onSend(); });
-
-// Init
+// Eventos
+form.addEventListener('submit', (e)=>{ e.preventDefault(); onSend(); });
 reset();
 </script>
 </body>
