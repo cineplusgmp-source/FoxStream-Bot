@@ -3,63 +3,47 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Fox Stream Bot</title>
   <style>
     :root{
       --bg:#eef2f7; --card:#fff; --primary:#2563eb; --primary-weak:#e8f0ff;
       --ok:#16a34a; --warn:#b91c1c; --muted:#6b7280; --bubble:#e9f2ff;
       --shadow:0 10px 30px rgba(0,0,0,.08);
-      --radius:16px;
     }
     html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      color:#0f172a;
-    }
-    .wrap{max-width:960px;margin:auto;padding:24px}
-    .card{
-      background:var(--card); border-radius:24px; box-shadow:var(--shadow);
-      padding:20px 20px 16px; min-height:60vh;
-    }
-    h1{margin:0 0 4px; text-align:center; font-size:clamp(22px,3.2vw,40px);}
-    .sub{color:var(--muted); text-align:center; margin-bottom:18px}
-    .chat{border:1px solid #e6ecf5; border-radius:20px; padding:14px; min-height:48vh; background:#fff}
-    .row{display:flex; gap:10px; margin:10px 0}
-    .bot{max-width:70%}
-    .me{margin-left:auto; max-width:70%}
-    .bubble{
-      background:var(--bubble); padding:10px 12px; border-radius:14px; line-height:1.45
-    }
+    body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;color:#0f172a}
+    .wrap{max-width:980px;margin:auto;padding:24px}
+    h1{margin:0;text-align:center;font-size:clamp(22px,3vw,34px)}
+    .sub{color:var(--muted);text-align:center;margin:2px 0 14px}
+    .ver{color:#94a3b8;text-align:center;margin:-6px 0 16px;font-size:12px}
+    .card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:20px 20px 16px;min-height:60vh}
+    .chat{border:1px solid #e6ecf5;border-radius:20px;padding:14px;min-height:48vh;background:#fff;overflow:auto}
+    .row{display:flex;gap:10px;margin:10px 0}
+    .bot{max-width:78%}
+    .me{margin-left:auto;max-width:78%}
+    .bubble{background:var(--bubble);padding:10px 12px;border-radius:14px;line-height:1.45}
     .me .bubble{background:#eef2f7}
-    .pill{display:inline-block;background:#eef2ff;padding:6px 10px;border-radius:999px}
+    .pill{display:inline-block;background:#eef5ff;padding:6px 10px;border-radius:999px}
     .ok{background:#e9f9ee;color:#0f7a33}
     .err{background:#fdecec;color:#b42318}
-    .actions{background:#f4f8ff; border:1px dashed #cfe0ff; padding:14px; border-radius:14px}
-    .btn{
-      display:inline-block; border:1px solid #cfe0ff; background:#fff; padding:10px 12px;
-      border-radius:12px; cursor:pointer; user-select:none; transition:.15s; margin:6px 8px 0 0
-    }
+    .actions{background:#f4f8ff;border:1px dashed #cfe0ff;padding:14px;border-radius:14px}
+    .btn{display:inline-block;border:1px solid #cfe0ff;background:#fff;padding:10px 12px;border-radius:14px;cursor:pointer;user-select:none;transition:.15s;margin:6px 8px 0 0}
     .btn:hover{background:#f7fbff}
-    .bar{display:flex; gap:10px; margin-top:12px}
-    .input{
-      flex:1; border:1px solid #d9e2ef; padding:12px 14px; border-radius:14px; outline:none;
-      font-size:16px; background:#fff;
-    }
-    .send{
-      border:none; background:var(--primary); color:#fff; padding:12px 18px; border-radius:14px;
-      cursor:pointer; font-weight:600;
-    }
-    .tip{color:var(--muted); font-size:12px}
-    @media (max-width:640px){
-      .chat{min-height:50vh}
-      .bot,.me{max-width:85%}
-    }
+    .bar{display:flex;gap:10px;margin-top:12px}
+    .input{flex:1;border:1px solid #d9e2ef;padding:12px 14px;border-radius:14px;outline:none;font-size:16px;background:#fff}
+    .send{border:none;background:var(--primary);color:#fff;padding:12px 18px;border-radius:14px;cursor:pointer;font-weight:600}
+    .tip{color:var(--muted);font-size:12px}
+    @media (max-width:640px){.bot,.me{max-width:90%}.chat{min-height:52vh}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Fox Stream Bot</h1>
     <div class="sub">Soporte automático 24/7</div>
+    <div class="ver">v0.7</div>
 
     <div class="card">
       <div id="chat" class="chat"></div>
@@ -73,41 +57,28 @@
   </div>
 
   <script>
-    // ========= CONFIG =========
-    // 1) URL CSV PÚBLICO de Google Sheets (ya publicado como CSV)
+    // ======= CONFIG =======
     const SHEET_CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vQWOkT2EnwWDIEUipuh_CN603Qm9KGk_N1qJrzP7Hy7b-wRrr0De06fE_8WAeUaywhGs2psz8c_fVIj/pub?gid=0&single=true&output=csv";
-
-    // 2) URL del Web App (Apps Script) — "Cualquiera" puede acceder
-    //    (la URL que me pasaste)
     const API_URL =
       "https://script.google.com/macros/s/AKfycbzPn0AeY6bKK5onUhfXeiWbSK_Pu3kNK-JI1qozE_OdxP4hAvo2_Jvmbv_lmRTvaarE/exec";
 
-    // 3) País por defecto (solo para normalizar números). Ej.: 51 Perú, 52 México, etc.
-    const DEFAULT_COUNTRY_CODE = "51"; // ajusta si lo necesitas
-
-    // ========= Estado =========
+    // ======= Estado =======
     const chat = document.getElementById("chat");
     const input = document.getElementById("msg");
     const btn = document.getElementById("send");
 
-    let state = "awaitPhone"; // awaitPhone -> menu -> awaitEmail
+    let state = "awaitPhone";     // awaitPhone -> menu -> awaitEmail
     let phoneOK = false;
-    let selectedType = null; // 1,2,3
-    let customers = [];      // [{name, phoneDigits}] normalizados (solo dígitos)
+    let selectedType = null;      // 1,2,3
+    let customers = [];           // {name, phoneDigits}
 
-    // ========= Utilidades UI =========
-    const addBot = (html, cls="") => {
-      const row = document.createElement("div"); row.className="row bot";
-      row.innerHTML = `<div class="bubble ${cls}">${html}</div>`;
-      chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-    };
-    const addUser = (text) => {
-      const row = document.createElement("div"); row.className="row me";
-      row.innerHTML = `<div class="bubble">${escapeHTML(text)}</div>`;
-      chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
-    };
-    const addActions = () => {
+    // ======= UI helpers =======
+    const escapeHTML = s => s.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const addBot = (html, cls="") => { const r=document.createElement("div"); r.className="row bot"; r.innerHTML=`<div class="bubble ${cls}">${html}</div>`; chat.appendChild(r); chat.scrollTop=chat.scrollHeight; };
+    const addUser = (text) => { const r=document.createElement("div"); r.className="row me"; r.innerHTML=`<div class="bubble">${escapeHTML(text)}</div>`; chat.appendChild(r); chat.scrollTop=chat.scrollHeight; };
+
+    function addActions(){
       const box = document.createElement("div");
       box.className = "row bot";
       box.innerHTML = `
@@ -120,58 +91,35 @@
           </div>
         </div>`;
       chat.appendChild(box); chat.scrollTop = chat.scrollHeight;
+      box.querySelectorAll(".btn").forEach(b => b.addEventListener("click", () => handleUserInput(b.dataset.type)));
+    }
 
-      box.querySelectorAll(".btn").forEach(b=>{
-        b.addEventListener("click", ()=>{
-          const t = b.getAttribute("data-type");
-          handleUserInput(t);
-        });
-      });
-    };
-    const escapeHTML = s => s.replace(/[&<>"']/g, m=>({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;" }[m]));
-
-    // ========= CSV -> cargar clientes =========
+    // ======= Clientes desde CSV =======
     async function loadCustomers(){
-      const res = await fetch(SHEET_CSV_URL);
+      const res = await fetch(SHEET_CSV_URL, {cache:"no-store"});
       const csv = await res.text();
       const lines = csv.split(/\r?\n/).filter(Boolean);
-      // Se espera: Col A = Nombre, Col B = Teléfono
-      // Detecta encabezado y procesa
       const out = [];
-      for (let i=1;i<lines.length;i++){
+      for(let i=1;i<lines.length;i++){
         const cols = lines[i].split(",");
         if (cols.length<2) continue;
-        const name = cols[0].trim();
-        const rawPhone = cols[1].trim();
-        const onlyDigits = rawPhone.replace(/\D/g,"");
-        out.push({ name, phoneDigits: onlyDigits });
+        out.push({ name: cols[0].trim(), phoneDigits: cols[1].replace(/\D/g,"") });
       }
       customers = out;
     }
-
-    function normalizePhone(inputDigits){
-      // quita todo menos dígitos
-      let d = (inputDigits||"").toString().replace(/\D/g,"");
-      // si el usuario no puso país, intentamos machear por últimos 8–9–10 dígitos
-      // Estrategia: comparar por los últimos 9 dígitos (ajústalo a tu realidad)
-      return d;
-    }
-
     function existsPhone(userDigits){
-      // comparamos por SUFIJO (últimos 9-10 dígitos)
-      const d = userDigits.replace(/\D/g,"");
+      const d = (userDigits||"").replace(/\D/g,"");
       const last9 = d.slice(-9);
       return customers.some(c => c.phoneDigits.endsWith(last9));
     }
 
-    // ========= Flujo =========
+    // ======= Flujo =======
     function resetToStart(){
       state = "awaitPhone";
       selectedType = null;
       input.value = "";
       input.placeholder = 'Escribe tu número de teléfono (solo dígitos)';
     }
-
     function toMenu(){
       state = "menu";
       addBot(`<span class="ok pill">Número verificado. ¡Bienvenido!</span>`);
@@ -179,7 +127,6 @@
       input.value = "";
       input.placeholder = 'Escribe "hola" para reiniciar o elige una opción';
     }
-
     function askEmailFor(type){
       selectedType = type;
       state = "awaitEmail";
@@ -191,9 +138,9 @@
     async function consultInbox(type, email){
       addBot(`⌛ Consultando tu correo…`, "pill");
       try{
-        const url = `${API_URL}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}`;
-        const res = await fetch(url, { method:"GET" });
-        const data = await res.json(); // <-- NO getResponseHeaders (no existe en fetch)
+        const url = `${API_URL}?type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}&v=0.7`;
+        const res = await fetch(url, { method:"GET", cache:"no-store" });
+        const data = await res.json();
 
         if(!data.ok){
           const msg = data.message || "No se encontró ningún correo enviado. Verifique que haya enviado el código o el enlace. Vuelva a intentarlo una vez lo haya hecho.";
@@ -204,12 +151,12 @@
 
         if (type==="1" && data.code){
           addBot(`<b>Tu código es:</b> <span class="pill">${escapeHTML(data.code)}</span><br/>Tienes 15 minutos para ingresarlo.`);
-        }else if ((type==="2"||type==="3") && data.link){
-          addBot(`<b>Tu enlace es:</b> <a href="${escapeHTML(data.link)}" target="_blank">${escapeHTML(data.link)}</a><br/>Tienes 15 minutos para ingresarlo.`);
-        }else{
+        } else if ((type==="2"||type==="3") && data.link){
+          const link = escapeHTML(data.link);
+          addBot(`<b>Tu enlace es:</b> <a href="${link}" target="_blank">${link}</a><br/>Tienes 15 minutos para ingresarlo.`);
+        } else {
           addBot(`No se encontraron datos válidos en el correo.`, "err");
         }
-
         addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
         resetToStart();
       }catch(err){
@@ -221,55 +168,52 @@
 
     async function handleUserInput(raw){
       const text = (raw ?? input.value).trim();
-      if(!text) return;
-
-      // mostrar mensaje del usuario
+      if (!text) return;
       addUser(text);
+      input.value = ""; // SIEMPRE limpiamos
 
-      if(state==="awaitPhone"){
-        const digits = normalizePhone(text);
+      // "hola" REINICIA SIEMPRE, SIN IMPORTAR EL ESTADO
+      if (text.toLowerCase() === "hola"){
+        resetToStart();
+        addBot(`👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.`);
+        return;
+      }
+
+      if (state === "awaitPhone"){
+        const digits = text.replace(/\D/g,"");
         if(!/^\d{6,15}$/.test(digits)){
-          addBot(`Formato inválido. Por favor, escribe solo dígitos.`,"err");
-          input.value=""; return;
+          addBot(`Formato inválido. Por favor, escribe solo dígitos.`, "err");
+          return;
         }
-        const ok = existsPhone(digits);
-        if(!ok){
-          addBot(`❌ Tu número no está registrado. Por favor, contáctate con el administrador.`,"err");
-          addBot(`Escribe <b>"hola"</b> para volver al menú principal.`,"pill");
-          input.value=""; return;
+        if(!existsPhone(digits)){
+          addBot(`❌ Tu número no está registrado. Por favor, contáctate con el administrador.`, "err");
+          addBot(`Escribe <b>"hola"</b> para volver al menú principal.`, "pill");
+          return;
         }
-        phoneOK = true; toMenu(); input.value="";
+        phoneOK = true; toMenu(); return;
       }
-      else if(state==="menu"){
-        const t = text.toLowerCase();
-        if (t==="hola"){ resetToStart(); addBot(`👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.`); return; }
 
-        if (["1","2","3"].includes(t)){
-          askEmailFor(t);
-        }else{
-          addBot(`Escribe 1, 2 o 3; o "hola" para reiniciar.`,"pill");
-        }
-        input.value="";
+      if (state === "menu"){
+        const pick = text.replace(/[^\d]/g,"");
+        if (["1","2","3"].includes(pick)) { askEmailFor(pick); return; }
+        addBot(`Respuesta inválida. Elige 1, 2 o 3.`, "err");
+        return;
       }
-      else if(state==="awaitEmail"){
+
+      if (state === "awaitEmail"){
         const email = text.toLowerCase();
-        // validación básica
-        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
-          addBot(`Correo inválido. Intenta nuevamente.`,"err");
-          input.value=""; return;
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+          addBot(`Correo inválido. Intenta nuevamente.`, "err");
+          return;
         }
         await consultInbox(selectedType, email);
-        input.value="";
+        return;
       }
     }
 
-    // ========= Listeners =========
     btn.addEventListener("click", ()=>handleUserInput());
-    input.addEventListener("keydown", (e)=>{
-      if(e.key==="Enter"){ e.preventDefault(); handleUserInput(); }
-    });
+    input.addEventListener("keydown", e => { if(e.key==="Enter"){ e.preventDefault(); handleUserInput(); } });
 
-    // ========= Inicio =========
     (async ()=>{
       await loadCustomers();
       addBot(`👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.`);
