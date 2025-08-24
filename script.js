@@ -1,47 +1,45 @@
 // URL de tu backend (Apps Script con /exec al final)
 const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec";
 
-// Elementos del DOM
+// DOM
 const chatBox = document.getElementById("chat-box");
-const input = document.getElementById("user-input");
+const input   = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-// Función para mostrar mensajes
-function addMessage(text, sender = "bot") {
+// Pintar mensajes
+function addMessage(text, sender = "bot", extraClass = "") {
   const div = document.createElement("div");
-  div.className = `message ${sender}`;
-  div.innerText = text;
+  div.className = `msg msg--${sender} ${extraClass}`;
+  div.textContent = text;
   chatBox.appendChild(div);
-  chatBox.scrollTop = chatBox.scrollHeight; // autoscroll
+  chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Enviar mensaje al backend
+// Envío al backend
 async function sendMessage() {
-  const text = input.value.trim();
+  const text = (input.value || "").trim();
   if (!text) return;
 
-  addMessage(text, "user"); // mostrar lo que escribió el cliente
-  input.value = ""; // limpiar caja de texto
+  addMessage(text, "user");
+  input.value = "";
 
   try {
-    const res = await fetch(`${BACKEND_URL}?q=${encodeURIComponent(text)}`);
+    const res  = await fetch(`${BACKEND_URL}?q=${encodeURIComponent(text)}`);
     const data = await res.json();
 
     if (data.ok) {
-      addMessage(data.message || "✅ Respuesta recibida.", "bot");
+      addMessage(data.message || "✅ Respuesta recibida.", "bot", "msg--ok");
     } else {
-      addMessage(`❌ Error: ${data.message}`, "bot");
+      addMessage(`❌ ${data.message || "Error desconocido"}`, "bot", "msg--error");
     }
-  } catch (e) {
-    addMessage("⚠️ Error: no hay conexión con el servidor.", "bot");
-    console.error(e);
+  } catch (err) {
+    console.error(err);
+    addMessage("⚠️ Error de conexión con el servidor.", "bot", "msg--error");
   }
 }
 
-// Click en botón
+// Eventos
 sendBtn.addEventListener("click", sendMessage);
-
-// Enter para enviar
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
 });
