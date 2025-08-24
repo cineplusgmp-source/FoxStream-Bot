@@ -8,7 +8,7 @@ let selectedOption = '';
 let userPhone = '';
 let userEmail = '';
 
-const API_BASE = 'http://localhost:3000/api'; // Ajustar cuando lo subamos al servidor
+const API_BASE = 'https://foxstream-bot.onrender.com'; // Ajustar cuando lo subamos al servidor
 
 // ===============================
 // Función para mostrar mensajes
