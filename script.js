@@ -1,25 +1,24 @@
-// URL de tu backend (Apps Script con /exec al final)
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec";
+// 1) Pega aquí la URL del backend CONVERSACIONAL v0.8 (la que responde ok:true con ?ping=1)
+const BACKEND_URL = "PEGAR_AQUI_TU_URL_DEL_BACKEND_V08";
 
-// DOM
+// 2) DOM
 const chatBox = document.getElementById("chat-box");
 const input   = document.getElementById("user-input");
 const sendBtn = document.getElementById("send-btn");
 
-// Pintar mensajes
-function addMessage(text, sender = "bot", extraClass = "") {
+// 3) Utilidad para añadir mensajes
+function addMessage(text, who = "bot", extra = "") {
   const div = document.createElement("div");
-  div.className = `msg msg--${sender} ${extraClass}`;
+  div.className = `msg msg--${who} ${extra}`;
   div.textContent = text;
   chatBox.appendChild(div);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Envío al backend
+// 4) Envío al backend (conv ersacional v0.8 usa ?q=)
 async function sendMessage() {
   const text = (input.value || "").trim();
   if (!text) return;
-
   addMessage(text, "user");
   input.value = "";
 
@@ -27,18 +26,18 @@ async function sendMessage() {
     const res  = await fetch(`${BACKEND_URL}?q=${encodeURIComponent(text)}`);
     const data = await res.json();
 
-    if (data.ok) {
-      addMessage(data.message || "✅ Respuesta recibida.", "bot", "msg--ok");
+    if (data && data.ok) {
+      addMessage(data.message || "✅ Listo.", "bot", "msg--ok");
     } else {
-      addMessage(`❌ ${data.message || "Error desconocido"}`, "bot", "msg--error");
+      addMessage(`❌ ${data?.message || "Error"}`, "bot", "msg--error");
     }
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     addMessage("⚠️ Error de conexión con el servidor.", "bot", "msg--error");
   }
 }
 
-// Eventos
+// 5) Eventos (clic y Enter)
 sendBtn.addEventListener("click", sendMessage);
 input.addEventListener("keypress", (e) => {
   if (e.key === "Enter") sendMessage();
