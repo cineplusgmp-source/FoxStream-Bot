@@ -4,89 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Fox Stream Bot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .chat-container {
-      width: 100%;
-      max-width: 600px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .chat-header {
-      background: #2c3e50;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
-    .chat-box {
-      flex: 1;
-      padding: 15px;
-      overflow-y: auto;
-    }
-    .message {
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 80%;
-      word-wrap: break-word;
-    }
-    .bot {
-      background: #eaf3ff;
-      align-self: flex-start;
-    }
-    .user {
-      background: #d1ffd6;
-      align-self: flex-end;
-    }
-    .chat-input {
-      display: flex;
-      border-top: 1px solid #ddd;
-    }
-    .chat-input input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      outline: none;
-      font-size: 16px;
-    }
-    .chat-input button {
-      background: #2c3e50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      cursor: pointer;
-    }
-    .chat-input button:hover {
-      background: #1a252f;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="chat-container">
-    <div class="chat-header">Fox Stream Bot</div>
+    <h2 class="title">Fox Stream Bot</h2>
     <div id="chat-box" class="chat-box">
       <div class="message bot">👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.</div>
     </div>
-    <div class="chat-input">
+
+    <div class="input-container">
       <input id="user-input" type="text" placeholder="Escribe tu número de teléfono (solo dígitos)" />
       <button id="send-btn">Enviar</button>
     </div>
   </div>
 
-  <!-- Conexión con script.js -->
   <script src="script.js"></script>
 </body>
 </html>
