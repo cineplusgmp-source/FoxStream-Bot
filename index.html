@@ -2,22 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fox Stream Bot</title>
+
+  <!-- Fuente pro -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="chat-container">
-    <h2 class="title">Fox Stream Bot</h2>
-    <div id="chat-box" class="chat-box">
-      <div class="message bot">👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.</div>
-    </div>
+  <main class="app">
+    <header class="app__header">
+      <div class="brand">
+        <span class="brand__logo">🦊</span>
+        <div class="brand__text">
+          <h1>Fox Stream Bot</h1>
+          <p class="subtitle">Soporte automático 24/7</p>
+        </div>
+      </div>
+      <div class="version">frontend <b>v0.8</b></div>
+    </header>
 
-    <div class="input-container">
-      <input id="user-input" type="text" placeholder="Escribe tu número de teléfono (solo dígitos)" />
-      <button id="send-btn">Enviar</button>
-    </div>
-  </div>
+    <section class="card">
+      <div id="chat-box" class="chat">
+        <div class="msg msg--bot">
+          👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.
+        </div>
+      </div>
+
+      <div class="composer">
+        <input
+          id="user-input"
+          type="text"
+          inputmode="numeric"
+          placeholder="Escribe tu número de teléfono (solo dígitos)"
+          aria-label="Ingresar mensaje"
+        />
+        <button id="send-btn" class="btn">Enviar</button>
+      </div>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
