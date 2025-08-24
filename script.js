@@ -1,15 +1,16 @@
-// Conexión con el backend (Google Apps Script)
+// === Configura tu backend aquí ===
 const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec";
 
-const chatBox = document.querySelector("#chat");
-const input = document.querySelector("#user-input");
-const sendBtn = document.querySelector("#send-btn");
+// Referencias al DOM
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
 
-// Función para agregar mensajes en pantalla
+// Función para agregar mensajes al chat
 function addMessage(text, sender = "bot") {
   const msg = document.createElement("div");
-  msg.className = sender === "bot" ? "msg bot" : "msg user";
-  msg.innerText = text;
+  msg.classList.add("message", sender);
+  msg.textContent = text;
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
@@ -29,21 +30,20 @@ async function sendMessage() {
     if (data.ok) {
       addMessage(data.message || "✅ Respuesta recibida", "bot");
     } else {
-      addMessage("❌ Error: " + data.message, "bot");
+      addMessage(`❌ Error: ${data.message}`, "bot");
     }
   } catch (e) {
-    addMessage("⚠️ Error de conexión con el servidor", "bot");
+    addMessage("⚠️ Error: no hay conexión con el servidor.", "bot");
     console.error(e);
   }
 }
 
-// Botón enviar
+// Evento para botón
 sendBtn.addEventListener("click", sendMessage);
 
-// Enter para enviar
+// Evento para Enter
 input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") sendMessage();
+  if (e.key === "Enter") {
+    sendMessage();
+  }
 });
-
-// Mensaje inicial
-addMessage("👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.");
