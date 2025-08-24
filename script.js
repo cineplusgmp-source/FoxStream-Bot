@@ -1,38 +1,34 @@
-// ================================
+// ==============================
 // Fox Stream Bot - script.js
-// ================================
+// ==============================
 
-// Variables globales
-let currentStep = 'phone_validation';
-let userPhone = '';
-let userEmail = '';
-let selectedOption = '';
+// Estado inicial
+let currentStep = "start";
+let selectedOption = "";
+let userPhone = "";
+let userEmail = "";
 
-// ⚡ URL de tu Apps Script (NO localhost)
-const API_BASE = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec"; 
+// 👆 Ojo: aquí va la URL de tu Apps Script (la misma que usas para validar)
 
-// ================================
-// Mostrar mensajes
-// ================================
+// Función para mostrar mensajes en el chat
 function addMessage(content, isUser = false) {
-    const messagesContainer = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = isUser ? 'user-message' : 'bot-message';
-    
-    const contentDiv = document.createElement('div');
-    contentDiv.className = 'message-content';
+    const messagesContainer = document.getElementById("chatMessages");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = isUser ? "user-message" : "bot-message";
+
+    const contentDiv = document.createElement("div");
+    contentDiv.className = "message-content";
     contentDiv.innerHTML = content;
-    
+
     messageDiv.appendChild(contentDiv);
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// ================================
-// Enviar mensaje
-// ================================
+// Enviar mensaje desde input
 async function sendMessage() {
-    const input = document.getElementById('messageInput');
+    const input = document.getElementById("messageInput");
     const message = input.value.trim();
     if (!message) return;
 
@@ -42,68 +38,43 @@ async function sendMessage() {
     await handleUserMessage(message);
 }
 
-// ================================
-// Flujo principal
-// ================================
+// Manejo del flujo del bot
 async function handleUserMessage(message) {
-    if (currentStep === 'phone_validation') {
-        await validatePhone(message);
-    } else {
-        addMessage("⚠️ Aún no hemos configurado el siguiente paso.");
-    }
-}
-
-// ================================
-// Validar número en Google Sheets
-// ================================
-async function validatePhone(phone) {
-    try {
-        addMessage("🔎 Validando tu número...");
-
-        const res = await fetch(`${API_BASE}?action=validatePhone&phone=${phone}`);
-        const data = await res.json();
-
-        if (data.ok && data.exists) {
-            userPhone = phone;
-            addMessage("✅ Número verificado. ¡Bienvenido!");
-            // Aquí mostramos el menú
-            showMainMenu();
-            currentStep = "menu";
+    if (currentStep === "start") {
+        if (message.toLowerCase() === "hola") {
+            addMessage(`
+                👋 Hola, bienvenido a Fox Stream Bot<br><br>
+                Selecciona una opción para continuar:<br><br>
+                1️⃣ Código de acceso temporal<br>
+                2️⃣ Actualizar tu Hogar<br>
+                3️⃣ Nueva solicitud de inicio<br><br>
+                <em>Responde solo con el número de la opción que deseas.</em>
+            `);
+            currentStep = "menu_selection";
         } else {
-            addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
+            addMessage("Por favor escribe 'hola' para comenzar.");
         }
-    } catch (err) {
-        console.error("Error validando teléfono:", err);
-        addMessage("⚠️ Error de conexión con el servidor.");
+    }
+
+    else if (currentStep === "menu_selection") {
+        if (["1", "2", "3"].includes(message)) {
+            selectedOption = message;
+            addMessage(`Has seleccionado la opción ${message}.`);
+            addMessage("Por favor, ingresa tu número de teléfono sin espacios:");
+            currentStep = "phone_validation";
+        } else {
+            addMessage("❌ Respuesta inválida. Debes elegir 1, 2 o 3.");
+        }
+    }
+
+    else {
+        addMessage("⚠️ Aún no implementamos los siguientes pasos (validación, correo y TV).");
     }
 }
 
-// ================================
-// Mostrar menú principal
-// ================================
-function showMainMenu() {
-    const menu = `
-        <div class="options-menu">
-            <p>Selecciona una opción para continuar:</p>
-            <button class="option-button" onclick="selectOption(1)">1️⃣ Código de acceso temporal</button>
-            <button class="option-button" onclick="selectOption(2)">2️⃣ Actualizar tu Hogar</button>
-            <button class="option-button" onclick="selectOption(3)">3️⃣ Nueva solicitud de inicio</button>
-        </div>
-    `;
-    addMessage(menu);
-}
-
-function selectOption(option) {
-    selectedOption = option;
-    addMessage(`Has seleccionado la opción ${option}`);
-}
-
-// ================================
-// Eventos de envío
-// ================================
-document.getElementById("messageInput").addEventListener("keypress", function (e) {
+// Permitir enviar con Enter
+document.getElementById("messageInput").addEventListener("keypress", function(e) {
     if (e.key === "Enter") {
         sendMessage();
     }
 });
-document.querySelector(".chat-input button").addEventListener("click", sendMessage);
