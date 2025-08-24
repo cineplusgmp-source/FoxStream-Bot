@@ -1,38 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fox Stream Bot</title>
-  <link rel="stylesheet" href="style.css" />
+  <!-- forzamos cache-busting -->
+  <link rel="stylesheet" href="style.css?v=4" />
 </head>
 <body>
-  <main class="app">
+  <div class="app">
     <header class="app__header">
-      <h1>Fox Stream Bot</h1>
-      <p class="sub">Soporte automático 24/7</p>
+      <div>
+        <h1 class="app__header h">Fox Stream Bot</h1>
+        <div class="app__header sub">Soporte automático 24/7</div>
+      </div>
     </header>
 
-    <section class="card">
-      <div id="chat-box" class="chat">
-        <div class="msg msg--bot">
-          👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.
-        </div>
-      </div>
+    <main class="card">
+      <section id="chat" class="chat" aria-live="polite"></section>
 
-      <div class="composer">
+      <form id="composer" class="composer" autocomplete="off">
         <input
-          id="user-input"
+          id="input"
+          class="user-input"
           type="text"
           inputmode="numeric"
-          placeholder="Escribe tu número de teléfono (solo dígitos)"
-          aria-label="Ingresar mensaje"
+          placeholder='Escribe tu número de teléfono (solo dígitos)'
+          aria-label="Escribe aquí"
         />
-        <button id="send-btn" class="btn">Enviar</button>
-      </div>
-    </section>
-  </main>
+        <button id="sendBtn" class="btn" type="submit">Enviar</button>
+      </form>
+    </main>
+  </div>
 
-  <script defer src="script.js"></script>
+  <!-- forzamos cache-busting -->
+  <script src="script.js?v=4"></script>
 </body>
 </html>
