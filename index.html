@@ -1,39 +1,35 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fox Stream Bot</title>
-  <!-- forzamos cache-busting -->
-  <link rel="stylesheet" href="style.css?v=4" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fox Stream Bot</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
-    <header class="app__header">
-      <div>
-        <h1 class="app__header h">Fox Stream Bot</h1>
-        <div class="app__header sub">Soporte automático 24/7</div>
-      </div>
-    </header>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <h2>🦊 Fox Stream Bot</h2>
+            <span class="status">Soporte automático 24/7</span>
+        </div>
+        
+        <!-- Mensajes -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="bot-message">
+                <div class="message-content">
+                    👋 ¡Hola! Escribe tu número de teléfono para validar tu acceso.
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input -->
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Escribe tu número de teléfono">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
 
-    <main class="card">
-      <section id="chat" class="chat" aria-live="polite"></section>
-
-      <form id="composer" class="composer" autocomplete="off">
-        <input
-          id="input"
-          class="user-input"
-          type="text"
-          inputmode="numeric"
-          placeholder='Escribe tu número de teléfono (solo dígitos)'
-          aria-label="Escribe aquí"
-        />
-        <button id="sendBtn" class="btn" type="submit">Enviar</button>
-      </form>
-    </main>
-  </div>
-
-  <!-- forzamos cache-busting -->
-  <script src="script.js?v=4"></script>
+    <script src="script.js"></script>
 </body>
 </html>
