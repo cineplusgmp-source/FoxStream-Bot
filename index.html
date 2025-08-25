@@ -8,29 +8,25 @@
 </head>
 <body>
   <div class="chat-container">
-    <!-- Encabezado -->
     <div class="chat-header">
       <h2>🦊 Fox Stream Bot</h2>
       <span class="status">Área de Soporte</span>
     </div>
-    
-    <!-- Mensajes -->
+
     <div class="chat-messages" id="chatMessages">
-      <div class="bot-message">
-        <div class="message-content">
-          👋 Bienvenido a Fox Stream Bot <br>
-          Presiona <strong>/start</strong> para comenzar
-        </div>
-      </div>
+      <!-- Aquí iniciamos con el botón de start -->
     </div>
-    
-    <!-- Input -->
+
     <div class="chat-input">
       <input type="text" id="messageInput" placeholder="Escribe tu mensaje...">
-      <button id="sendBtn">Enviar</button>
+      <button onclick="sendMessage()">Enviar</button>
     </div>
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Mostrar el mensaje inicial con botón
+    showStartMessage();
+  </script>
 </body>
 </html>
