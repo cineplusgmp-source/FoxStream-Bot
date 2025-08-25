@@ -1,18 +1,18 @@
-// ===============================
+// ================================
 // Fox Stream Bot - script.js
-// ===============================
+// ================================
 
+// Variables globales
 let currentStep = "start";
 let selectedOption = "";
 let userPhone = "";
 let userEmail = "";
 
-// Aquí pones la URL de Apps Script (exec)
-const API_BASE = "https://script.google.com/macros/s/AKfycbzOTYcuXAlT3ke7GqxpO7a6w-T4JShnHT16_bVmE-rDmijXNkgB_7VktHPQYzZeP9Y/exec";
+const API_BASE = "https://foxstream-bot.onrender.com/api";
 
-// ===============================
+// ================================
 // Función para mostrar mensajes
-// ===============================
+// ================================
 function addMessage(content, isUser = false) {
   const messagesContainer = document.getElementById("chatMessages");
   const messageDiv = document.createElement("div");
@@ -27,68 +27,61 @@ function addMessage(content, isUser = false) {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-// ===============================
-// Flujo del bot
-// ===============================
-async function handleUserMessage(message) {
-  if (currentStep === "start") {
-    if (message.toLowerCase() === "/start" || message.toLowerCase() === "hola") {
-      addMessage("👋 Hola, bienvenido a Fox Stream Bot<br><br>Selecciona una opción para continuar:<br><br>1️⃣ Código de acceso temporal<br>2️⃣ Actualizar tu Hogar<br>3️⃣ Nueva solicitud de inicio<br><br><em>Responde solo con el número de la opción que deseas.</em>");
-      currentStep = "menu";
-    } else {
-      addMessage("Por favor escribe <b>/start</b> para comenzar.");
-    }
-    return;
-  }
-
-  if (currentStep === "menu") {
-    if (["1", "2", "3"].includes(message)) {
-      selectedOption = message;
-      addMessage(`Has seleccionado la opción ${message}.`);
-      addMessage("Por favor, ingresa tu número de teléfono sin espacios:");
-      currentStep = "phone";
-    } else {
-      addMessage("❌ Opción inválida. Escribe 1, 2 o 3.");
-    }
-    return;
-  }
-
-  if (currentStep === "phone") {
-    userPhone = message;
-    addMessage("🔎 Validando tu número...");
-
-    try {
-      const res = await fetch(`${API_BASE}?action=validate-phone&phone=${userPhone}`);
-      const data = await res.json();
-
-      if (data.valid) {
-        addMessage("✅ Número verificado. ¡Bienvenido!");
-        addMessage("Ahora ingresa tu correo o elige activación por código de TV.");
-        currentStep = "email_or_code";
-      } else {
-        addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
-        currentStep = "start";
-      }
-    } catch (e) {
-      addMessage("⚠️ Error de conexión con el servidor.");
-      console.error(e);
-    }
-    return;
-  }
-
-  if (currentStep === "email_or_code") {
-    addMessage("📩 Aquí procesaremos correo o código de TV (falta implementar).");
-    // Aquí puedes continuar el flujo...
-    return;
-  }
+// ================================
+// Mensaje inicial con botón Start
+// ================================
+function showStartMessage() {
+  addMessage(
+    "👋 Bienvenido a Fox Stream Bot<br><br><button class='option-button' onclick='startBot()'>🚀 Iniciar Bot</button>"
+  );
 }
 
-// ===============================
-// Enviar mensaje
-// ===============================
+function startBot() {
+  showMainMenu();
+  currentStep = "menu";
+}
+
+// ================================
+// Menú principal
+// ================================
+function showMainMenu() {
+  const menuContent = `
+    <div class="options-menu">
+      <p><strong>Selecciona una opción para continuar:</strong></p>
+      <button class="option-button" onclick="selectOption(1)">1️⃣ Código de acceso temporal</button>
+      <button class="option-button" onclick="selectOption(2)">2️⃣ Actualizar tu Hogar</button>
+      <button class="option-button" onclick="selectOption(3)">3️⃣ Nueva solicitud de inicio</button>
+      <p><em>Responde solo con el número de la opción que deseas.</em></p>
+    </div>
+  `;
+  addMessage(menuContent);
+}
+
+// ================================
+// Manejo de opciones
+// ================================
+function selectOption(option) {
+  selectedOption = option;
+  const optionNames = {
+    1: "Código de acceso temporal",
+    2: "Actualizar tu Hogar",
+    3: "Nueva solicitud de inicio"
+  };
+
+  addMessage(option.toString(), true);
+  addMessage(`Has seleccionado la opción ${option}: ${optionNames[option]}`);
+
+  addMessage("Por favor, ingresa tu número de teléfono sin espacios:");
+  currentStep = "phone_validation";
+}
+
+// ================================
+// Envío de mensajes
+// ================================
 async function sendMessage() {
   const input = document.getElementById("messageInput");
   const message = input.value.trim();
+
   if (!message) return;
 
   addMessage(message, true);
@@ -97,10 +90,63 @@ async function sendMessage() {
   await handleUserMessage(message);
 }
 
-// ===============================
-// Eventos
-// ===============================
-document.getElementById("sendBtn").addEventListener("click", sendMessage);
+// ================================
+// Manejo de flujo
+// ================================
+async function handleUserMessage(message) {
+  try {
+    switch (currentStep) {
+      case "start":
+        if (message.toLowerCase() === "/start" || message.toLowerCase() === "hola") {
+          startBot();
+        } else {
+          showStartMessage();
+        }
+        break;
+
+      case "phone_validation":
+        await validatePhone(message);
+        break;
+
+      default:
+        addMessage("Por favor, sigue las instrucciones del menú.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    addMessage("Ha ocurrido un error. Por favor, intenta nuevamente.");
+  }
+}
+
+// ================================
+// Validar número
+// ================================
+async function validatePhone(phone) {
+  addMessage("🔎 Validando tu número...");
+
+  try {
+    const response = await fetch(`${API_BASE}/validate-phone`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone })
+    });
+
+    const result = await response.json();
+
+    if (result.valid) {
+      userPhone = phone;
+      addMessage("✅ Número verificado. ¡Bienvenido!");
+    } else {
+      addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
+    }
+  } catch (error) {
+    console.error("Error en validación:", error);
+    addMessage("Error al validar el número. Intenta nuevamente.");
+  }
+}
+
+// ================================
+// Event listener para Enter
+// ================================
 document.getElementById("messageInput").addEventListener("keypress", function (e) {
   if (e.key === "Enter") {
     sendMessage();
