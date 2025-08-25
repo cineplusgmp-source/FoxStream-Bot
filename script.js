@@ -15,6 +15,12 @@ const API_BASE = "https://foxstream-bot.onrender.com/api";
 // ================================
 function addMessage(content, isUser = false) {
   const messagesContainer = document.getElementById("chatMessages");
+
+  if (!messagesContainer) {
+    console.error("⚠️ No se encontró el contenedor de mensajes (#chatMessages)");
+    return;
+  }
+
   const messageDiv = document.createElement("div");
   messageDiv.className = isUser ? "user-message" : "bot-message";
 
@@ -148,11 +154,12 @@ async function validatePhone(phone) {
 // ================================
 // Event listener para Enter
 // ================================
-document.getElementById("messageInput").addEventListener("keypress", function (e) {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
-});
+document.addEventListener("DOMContentLoaded", () => {
+  showStartMessage();
 
-// Ejecuta el mensaje inicial automáticamente
-showStartMessage();
+  document.getElementById("messageInput").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+      sendMessage();
+    }
+  });
+});
