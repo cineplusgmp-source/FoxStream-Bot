@@ -39,13 +39,13 @@ function addMessage(content, isUser = false) {
 function showStartMessage() {
   addMessage(`
     👋 Bienvenido a Fox Stream Bot <br>
-    <button class="option-button" onclick="startBot()">🚀 Presiona aquí para comenzar</button>
+    <button class="option-button" onclick="startBot()">🎟️ Presiona aquí para comenzar</button>
   `);
 }
 
 function startBot() {
-  showMainMenu();
-  currentStep = "menu";
+  addMessage("Por favor, ingresa tu número sin espacios para validar tu acceso:");
+  currentStep = "phone_validation";
 }
 
 // ================================
@@ -78,8 +78,7 @@ function selectOption(option) {
   addMessage(option.toString(), true);
   addMessage(`Has seleccionado la opción ${option}: ${optionNames[option]}`);
 
-  addMessage("Por favor, ingresa tu número de teléfono sin espacios:");
-  currentStep = "phone_validation";
+  // aquí podrías continuar con los siguientes pasos
 }
 
 // ================================
@@ -115,6 +114,14 @@ async function handleUserMessage(message) {
         await validatePhone(message);
         break;
 
+      case "menu":
+        if (["1", "2", "3"].includes(message)) {
+          selectOption(parseInt(message));
+        } else {
+          addMessage("❌ Opción inválida. Por favor escribe 1, 2 o 3.");
+        }
+        break;
+
       default:
         addMessage("Por favor, sigue las instrucciones del menú.");
     }
@@ -142,6 +149,8 @@ async function validatePhone(phone) {
     if (result.valid) {
       userPhone = phone;
       addMessage("✅ Número verificado. ¡Bienvenido!");
+      showMainMenu();
+      currentStep = "menu";
     } else {
       addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
     }
