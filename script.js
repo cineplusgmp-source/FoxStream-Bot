@@ -34,6 +34,26 @@ function addMessage(content, isUser = false) {
 }
 
 // ================================
+// Efecto escribiendo...
+// ================================
+function showTyping(callback, delay = 1200) {
+  const typingDiv = document.createElement("div");
+  typingDiv.className = "bot-message";
+  typingDiv.innerHTML = `<div class="message-content typing">
+    <span></span><span></span><span></span>
+  </div>`;
+
+  const messagesContainer = document.getElementById("chatMessages");
+  messagesContainer.appendChild(typingDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+  setTimeout(() => {
+    messagesContainer.removeChild(typingDiv);
+    callback();
+  }, delay);
+}
+
+// ================================
 // Mensaje inicial con botón Start
 // ================================
 function showStartMessage() {
@@ -44,25 +64,29 @@ function showStartMessage() {
 }
 
 function startBot() {
-  addMessage("Por favor, ingresa tu número sin espacios para validar tu acceso:");
-  currentStep = "phone_validation"; // ⚡ aquí aseguramos que el paso sea validación
+  showTyping(() => {
+    addMessage("Por favor, ingresa tu número sin espacios para validar tu acceso:");
+    currentStep = "phone_validation";
+  });
 }
 
 // ================================
-// Menú principal (solo después de validar teléfono)
+// Menú principal
 // ================================
 function showMainMenu() {
-  const menuContent = `
-    <div class="options-menu">
-      <p><strong>Selecciona una opción para continuar:</strong></p>
-      <button class="option-button" onclick="selectOption(1)">1️⃣ Código de acceso temporal</button>
-      <button class="option-button" onclick="selectOption(2)">2️⃣ Actualizar tu Hogar</button>
-      <button class="option-button" onclick="selectOption(3)">3️⃣ Nueva solicitud de inicio</button>
-      <p><em>Responde solo con el número de la opción que deseas.</em></p>
-    </div>
-  `;
-  addMessage(menuContent);
-  currentStep = "menu"; // 👈 paso actualizado solo después de validar
+  showTyping(() => {
+    const menuContent = `
+      <div class="options-menu">
+        <p><strong>Selecciona una opción para continuar:</strong></p>
+        <button class="option-button" onclick="selectOption(1)">1️⃣ Código de acceso temporal</button>
+        <button class="option-button" onclick="selectOption(2)">2️⃣ Actualizar tu Hogar</button>
+        <button class="option-button" onclick="selectOption(3)">3️⃣ Nueva solicitud de inicio</button>
+        <p><em>Responde solo con el número de la opción que deseas.</em></p>
+      </div>
+    `;
+    addMessage(menuContent);
+    currentStep = "menu";
+  });
 }
 
 // ================================
@@ -77,7 +101,9 @@ function selectOption(option) {
   };
 
   addMessage(option.toString(), true);
-  addMessage(`Has seleccionado la opción ${option}: ${optionNames[option]}`);
+  showTyping(() => {
+    addMessage(`Has seleccionado la opción ${option}: ${optionNames[option]}`);
+  });
 }
 
 // ================================
@@ -134,7 +160,9 @@ async function handleUserMessage(message) {
 // Validar número
 // ================================
 async function validatePhone(phone) {
-  addMessage("🔎 Validando tu número...");
+  showTyping(() => {
+    addMessage("🔎 Validando tu número...");
+  });
 
   try {
     const response = await fetch(`${API_BASE}/validate-phone`, {
@@ -147,10 +175,14 @@ async function validatePhone(phone) {
 
     if (result.valid) {
       userPhone = phone;
-      addMessage("✅ Número verificado. ¡Bienvenido!");
-      showMainMenu(); // 👈 solo aquí se muestra el menú
+      showTyping(() => {
+        addMessage("✅ Número verificado. ¡Bienvenido!");
+        showMainMenu();
+      });
     } else {
-      addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
+      showTyping(() => {
+        addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
+      });
     }
   } catch (error) {
     console.error("Error en validación:", error);
