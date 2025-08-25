@@ -31,9 +31,10 @@ function addMessage(content, isUser = false) {
 // Mensaje inicial con botón Start
 // ================================
 function showStartMessage() {
-  addMessage(
-    "👋 Bienvenido a Fox Stream Bot<br><br><button class='option-button' onclick='startBot()'>🚀 Iniciar Bot</button>"
-  );
+  addMessage(`
+    👋 Bienvenido a Fox Stream Bot <br>
+    <button class="option-button" onclick="startBot()">🚀 Presiona aquí para comenzar</button>
+  `);
 }
 
 function startBot() {
@@ -152,3 +153,6 @@ document.getElementById("messageInput").addEventListener("keypress", function (e
     sendMessage();
   }
 });
+
+// Ejecuta el mensaje inicial automáticamente
+showStartMessage();
