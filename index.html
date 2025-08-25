@@ -1,28 +1,34 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fox Stream Bot</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fox Stream Bot</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">
-      <h2>🦊 Fox Stream Bot</h2>
-      <span class="status">Área de Soporte</span>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h2>🦊 Fox Stream Bot</h2>
+            <span class="status">Área de Soporte</span>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <!-- Mensaje inicial -->
+            <div class="bot-message">
+                <div class="message-content">
+                    👋 Bienvenido a Fox Stream Bot <br>
+                    <button class="option-button" onclick="startBot()">🎟️ Presiona aquí para comenzar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Escribe tu mensaje...">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
     </div>
 
-    <!-- Mensajes -->
-    <div class="chat-messages" id="chatMessages"></div>
-
-    <!-- Input -->
-    <div class="chat-input">
-      <input type="text" id="messageInput" placeholder="Escribe tu mensaje...">
-      <button onclick="sendMessage()">Enviar</button>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
