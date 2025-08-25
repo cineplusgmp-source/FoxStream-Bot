@@ -45,11 +45,11 @@ function showStartMessage() {
 
 function startBot() {
   addMessage("Por favor, ingresa tu número sin espacios para validar tu acceso:");
-  currentStep = "phone_validation";
+  currentStep = "phone_validation"; // ⚡ aquí aseguramos que el paso sea validación
 }
 
 // ================================
-// Menú principal
+// Menú principal (solo después de validar teléfono)
 // ================================
 function showMainMenu() {
   const menuContent = `
@@ -62,6 +62,7 @@ function showMainMenu() {
     </div>
   `;
   addMessage(menuContent);
+  currentStep = "menu"; // 👈 paso actualizado solo después de validar
 }
 
 // ================================
@@ -77,8 +78,6 @@ function selectOption(option) {
 
   addMessage(option.toString(), true);
   addMessage(`Has seleccionado la opción ${option}: ${optionNames[option]}`);
-
-  // aquí podrías continuar con los siguientes pasos
 }
 
 // ================================
@@ -149,8 +148,7 @@ async function validatePhone(phone) {
     if (result.valid) {
       userPhone = phone;
       addMessage("✅ Número verificado. ¡Bienvenido!");
-      showMainMenu();
-      currentStep = "menu";
+      showMainMenu(); // 👈 solo aquí se muestra el menú
     } else {
       addMessage("❌ Tu número no está registrado. Contacta con el administrador.");
     }
